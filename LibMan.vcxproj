@@ -153,6 +153,7 @@
     <ClInclude Include="headers\commons.h" />
     <ClInclude Include="headers\encrypt.h" />
     <ClInclude Include="headers\stockman.h" />
+    <ClInclude Include="headers\tester.h" />
     <ClInclude Include="headers\uid.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
@@ -172,6 +173,8 @@
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stockman.cpp" />
+    <ClCompile Include="tester.cpp" />
+    <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="misc\debuggers\imgui.natvis" />

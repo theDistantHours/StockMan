@@ -39,6 +39,9 @@
     <ClInclude Include="headers\uid.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="headers\tester.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">
@@ -72,6 +75,12 @@
       <Filter>sources</Filter>
     </ClCompile>
     <ClCompile Include="headers\uid.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="timer.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="tester.cpp">
       <Filter>sources</Filter>
     </ClCompile>
   </ItemGroup>

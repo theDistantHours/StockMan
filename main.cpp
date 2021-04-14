@@ -79,9 +79,12 @@ int main(int, char**)
         ImGui::SetNextWindowSize(windowsize_login);
         ImGui::SetNextWindowPos(windowpos_login);
 
-        ImGui::Begin("Stock Manager");
+#pragma region UILogic
 
-        ImGui::End();
+
+
+
+#pragma endregion
 
         // Render the GUI and draw it onto the window
         if (!RenderGUI(clear_color))return 1;

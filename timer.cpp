@@ -13,9 +13,9 @@ void setVirtualTime(time_t t){
     virtual_time = t;
 }
 time_t randomtime(time_t start, time_t end) {
-    unsigned long long int  a = rand();
-    unsigned long long int b = rand();
-    unsigned long long int c = (a << 32) | b;
+    int  a = rand();
+    int b = rand();
+    int c = (a << 32) | b;
     c %= (end - start);
     return (time_t)c;
 }
