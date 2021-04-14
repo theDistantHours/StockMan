@@ -1,0 +1,5 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(519,5): warning MSB8028: The intermediate directory (G:\Common\Coding\LibMan\Debug\) contains files shared from another project (example_win32_directx11.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  main.cpp
+G:\Common\Coding\LibMan\main.cpp(39,10): warning C4189: 'show_demo_window': local variable is initialized but not referenced
+G:\Common\Coding\LibMan\main.cpp(40,10): warning C4189: 'show_another_window': local variable is initialized but not referenced
+  LibMan.vcxproj -> G:\Common\Coding\LibMan\Debug\LibMan.exe

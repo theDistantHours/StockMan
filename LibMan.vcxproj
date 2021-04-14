@@ -79,10 +79,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <IncludePath>G:\Common\Coding\LibMan\imgui;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <IncludePath>G:\Common\Coding\LibMan\headers;G:\Common\Coding\LibMan\imgui;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -147,6 +149,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="headers\commons.h" />
+    <ClInclude Include="headers\encrypt.h" />
+    <ClInclude Include="headers\stockman.h" />
+    <ClInclude Include="headers\uid.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_internal.h" />
@@ -154,6 +160,8 @@
     <ClInclude Include="imgui\imgui_impl_win32.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="encrypt.cpp" />
+    <ClCompile Include="headers\uid.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -162,6 +170,7 @@
     <ClCompile Include="imgui\imgui_impl_dx11.cpp" />
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="stockman.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="misc\debuggers\imgui.natvis" />

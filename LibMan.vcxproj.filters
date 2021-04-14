@@ -7,6 +7,9 @@
     <Filter Include="sources">
       <UniqueIdentifier>{08e36723-ce4f-4cff-9662-c40801cf1acf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="headers">
+      <UniqueIdentifier>{2a96f0bd-ced8-4576-b5d9-8638d7e72928}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -23,6 +26,18 @@
     </ClInclude>
     <ClInclude Include="imgui\imgui_impl_win32.h">
       <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\stockman.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\encrypt.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\commons.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="headers\uid.h">
+      <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +64,15 @@
     </ClCompile>
     <ClCompile Include="imgui\imgui_impl_win32.cpp">
       <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="stockman.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="encrypt.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="headers\uid.cpp">
+      <Filter>sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
