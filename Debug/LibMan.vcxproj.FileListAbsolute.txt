@@ -1,2 +1,1 @@
 G:\Common\Coding\LibMan\Debug\LibMan.exe
-G:\Common\Coding\Github\LibMan\Debug\LibMan.exe

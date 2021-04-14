@@ -1,15 +1,1 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(519,5): warning MSB8028: The intermediate directory (G:\Common\Coding\Github\LibMan\Debug\) contains files shared from another project (example_win32_directx11.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  encrypt.cpp
-  uid.cpp
-  imgui.cpp
-  imgui_demo.cpp
-  imgui_draw.cpp
-  imgui_tables.cpp
-  imgui_widgets.cpp
-  imgui_impl_dx11.cpp
-  imgui_impl_win32.cpp
-  main.cpp
-G:\Common\Coding\Github\LibMan\main.cpp(43,10): warning C4189: 'logged_in': local variable is initialized but not referenced
-  stockman.cpp
-  Generating Code...
-  LibMan.vcxproj -> G:\Common\Coding\Github\LibMan\Debug\LibMan.exe
+﻿

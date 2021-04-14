@@ -8,3 +8,4 @@
 *.db-shm
 *.obj
 *.pdb
+./Debug
