@@ -45,8 +45,7 @@ int main(int, char**)
 
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    ImVec2 windowsize_login = ImVec2(800, 600);
-    ImVec2 windowpos_login = ImVec2(200, 50);
+    
 
     // Main loop
     bool done = false;
@@ -76,13 +75,60 @@ int main(int, char**)
 
         
 
-        ImGui::SetNextWindowSize(windowsize_login);
-        ImGui::SetNextWindowPos(windowpos_login);
+        
 
 #pragma region UILogic
 
+        using namespace ImGui;
+
+        static bool isloggedin;
+        static bool showloginwindow;
+        static bool showregisterwindow;
+
+        static ImVec2 windowsize_login = ImVec2(800, 600);
+        static ImVec2 windowpos_login = ImVec2(200, 50);
+        static ImVec2 center = ImGui::GetMainViewport()->GetCenter();
 
 
+        
+        if (!isloggedin) {
+            SetNextWindowSize(windowsize_login);
+            SetNextWindowPos(windowpos_login);
+
+            Begin("Login");//Login window
+            {
+                if (BeginMainMenuBar()) {
+                    if (BeginMenu("About")) {
+                        if (Button("About this program....")) 
+                            OpenPopup("About Window");
+
+                        
+                        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+                        if (ImGui::BeginPopupModal("About Window", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+                        {
+                            ImGui::Text("This is a demonstration of a very simple stock manager program.\nThe GUI is based on dear-ImGUI ,MIT LICENSE.\nFor homework use only.\n");
+                            ImGui::Separator();
+                            ImGui::Text("Author : Lin JiaYin\nClass: 0140");
+                            //static int unused_i = 0;
+                            //ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
+
+                            static bool dont_ask_me_next_time = false;
+                            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
+                            if (ImGui::Button("I got it")) {
+                                CloseCurrentPopup();
+                            }
+                            ImGui::PopStyleVar();
+
+                            ImGui::EndPopup();
+                        }
+                        ImGui::EndMenu();
+                    }
+                }
+                EndMainMenuBar();
+            }
+            End();
+
+        }
 
 #pragma endregion
 
