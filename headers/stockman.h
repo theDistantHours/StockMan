@@ -18,7 +18,7 @@ enum userType {
     guest, worker, admin
 };
 enum operationType {
-    add, remove, query, login
+    ADD, REMOVE, QUERY, LOGIN
 };
 
 struct record;
