@@ -27,7 +27,10 @@ struct stockAttr;
 struct stockCategory;
 struct stockItem;
 struct loginToken;
+struct queryResultItems;
+struct queryOptions;
 class stockMan;
+
 
 
 
@@ -86,11 +89,17 @@ struct stockItem :public data {
     uid id;
     vector<stockCategory> types;
     vector<stockAttr> attrs;
+
+    unsigned long long int min_count;
+    unsigned long long int max_count;
+
     unsigned long long int count;
-    vector<unsigned long long int> durances;
+    map<int, int> durances;
+    map<int, int> dates;
 
     bool write(fstream) override;
     bool load(fstream) override;
+    void sort();
 };
 
 struct loginToken :public data {
@@ -104,14 +113,35 @@ struct loginToken :public data {
     bool load(fstream) override;
 };
 
+struct queryOptions {
+
+};
+
 
 class stockMan {
 public:
+
     loginToken login(string username, string password);
+    bool regist(string username, string password);
+
+
     vector<stockCategory>& getCategories(void);
     vector<stockAttr>& getAttributes(void);
-    bool addCategory(stockCategory type);
-    bool addAttr(stockAttr attr);
+    vector<uid> query(queryOptions options);
+
+    bool addCategory(stockCategory type,loginToken token, string comment = "No comment");
+    bool addAttr(stockAttr attr, loginToken token, string comment = "No comment");
+    bool removeCategory(uid id, loginToken token, string comment = "No comment");
+    bool removeCategory(string name, loginToken token, string comment = "No comment");
+    bool removeAttr(uid id, loginToken token, string comment = "No comment");
+    bool removeAttr(string name, loginToken token, string comment = "No comment");
+
+    bool InStock(string name, unsigned long long int count, unsigned long long int durance, loginToken token,string comment ="No comment");
+    bool InStock(uid id, unsigned long long int count, unsigned long long int durance, loginToken token,string comment="No comment");
+
+    bool OutStock(string name, unsigned long long int count, unsigned long long int durance, loginToken token, string comment = "No comment");
+    bool OutStock(uid id, unsigned long long int count, unsigned long long int durance, loginToken token, string comment = "No comment");
+
 private:
 };
 
