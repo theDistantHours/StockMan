@@ -70,11 +70,12 @@
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>G:\Common\Coding\LibMan\imgui;$(IncludePath)</IncludePath>
+    <IncludePath>G:\Common\Coding\Github\LibMan\headers;G:\Common\Coding\LibMan\imgui;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <IncludePath>G:\Common\Coding\Github\LibMan\headers;G:\Common\Coding\Github\LibMan\imgui;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)$(Configuration)\</OutDir>

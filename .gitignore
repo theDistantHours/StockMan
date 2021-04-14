@@ -1,2 +1,10 @@
 
 *.jpg
+*.ipch
+*.opendb
+*.db-wal
+*.db
+.vs/LibMan_Solution/v16/.suo
+*.db-shm
+*.obj
+*.pdb
