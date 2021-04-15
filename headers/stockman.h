@@ -123,8 +123,8 @@ public:
     bool regist(string username, string password);
 
 
-    vector<stockCategory>& getCategories(void);
-    vector<stockAttr>& getAttributes(void);
+    vector<stockCategory> getCategories(void);
+    vector<stockAttr> getAttributes(void);
     string getAttrName(uid id);
     uid getAttrId(string name);
     string getCategoryName(uid id);
@@ -133,6 +133,9 @@ public:
     uid getItemId(string name);
     
     string getUserInfo(uid id, loginToken token ,string comment = "No comment");
+
+    result findUser(uid id);
+    result findUser(string name);
 
     result addCategory(stockCategory type,loginToken token, string comment = "No comment");
     result addAttr(stockAttr attr, loginToken token, string comment = "No comment");

@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
+#include "commons.h"
 
 #include "stockman.h"
 
@@ -12,10 +13,10 @@
 #include <tchar.h>
 
 // Data
-static ID3D11Device*            g_pd3dDevice = NULL;
-static ID3D11DeviceContext*     g_pd3dDeviceContext = NULL;
-static IDXGISwapChain*          g_pSwapChain = NULL;
-static ID3D11RenderTargetView*  g_mainRenderTargetView = NULL;
+static ID3D11Device* g_pd3dDevice = NULL;
+static ID3D11DeviceContext* g_pd3dDeviceContext = NULL;
+static IDXGISwapChain* g_pSwapChain = NULL;
+static ID3D11RenderTargetView* g_mainRenderTargetView = NULL;
 static HWND g_hwnd;
 static WNDCLASSEX g_wcex;
 
@@ -30,22 +31,32 @@ bool InitGraphics();
 void CloseGraphics();
 bool RenderGUI(ImVec4 clear_color);
 
+
+result validateLogin(loginToken token, userType type);
+
+//Modal helper functions
+void showLoginNeeded(bool isopen = false,enum userType requiredType = guest);
+void showAbout(bool isopen = false);
+
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+stockMan StockMan;
+
+using namespace ImGui;
 // Main code
 int main(int, char**)
 {
     // Initialize window and graphics
     if (!InitGraphics())return 1;
-    
+
     // window states
 
     bool logged_in = false;
-    
+
 
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    
+
 
     // Main loop
     bool done = false;
@@ -73,23 +84,156 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        
 
-        
+
+
 
 #pragma region UILogic
 
-        using namespace ImGui;
 
-        static bool isloggedin;
-        static bool showloginwindow;
-        static bool showregisterwindow;
+
+        static bool isloggedin = false;
+        static bool showloginwindow = true;
+        static bool showregisterwindow = false;
+
+        static bool showInStockWindow = false;
+
+        static bool showAddCategory = false;
+        static bool showAddAttr = false;
+        static bool showAddItem = false;
+        static bool showEditItem = false;
+        static bool showUserList = false;
+        static bool showLoginWindow = false;
+        static bool showYealystat = false;
+        static bool showMonthlystat = false;
+        static bool showWeeklystat = false;
+        static bool showUsermanage = false;
+        static bool showLogwindow = false;
+        static bool showDatabaseSelection = false;
 
         static ImVec2 windowsize_login = ImVec2(800, 600);
-        static ImVec2 windowpos_login = ImVec2(200, 50);
+        static ImVec2 windowpos_login = ImVec2(250, 50);
         static ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        static loginToken currentLoginToken;
 
+        
+        if (BeginMainMenuBar()) {
 
+            if (BeginMenu("About")) {
+                if (MenuItem("About this program...."))
+                    showAbout(true);
+                ImGui::EndMenu();
+            }
+            if (BeginMenu("In/Out")) {
+                if (MenuItem("In Stock.")) {
+                    if (validateLogin(currentLoginToken, worker) == success)
+                        showInStockWindow = true;
+                    else
+                        showLoginNeeded(true,worker);
+
+                }
+                if (MenuItem("Out Stock")) {
+                    if (validateLogin(currentLoginToken, worker) == success)
+                        showInStockWindow = true;
+                    else
+                        showLoginNeeded(true,worker);
+
+                }
+                ImGui::EndMenu();
+            }
+            if (BeginMenu("Edit")) {
+                if (ImGui::MenuItem("Add/Remove Category")) {
+                    if (validateLogin(currentLoginToken, worker) == success)showAddCategory = true;
+                    else
+                    {
+                        showLoginNeeded(true, worker);
+                    }
+                }
+                if (ImGui::MenuItem("Add/Remove Attribute")) {
+                    if (validateLogin(currentLoginToken, worker)==success)showAddCategory = true;
+                    else
+                    {
+                        showLoginNeeded(true, worker);
+                    }
+                }
+                if (ImGui::MenuItem("Add/Remove Items")) {
+                    if (validateLogin(currentLoginToken, worker) == success)showAddItem = true;
+                    else
+                    {
+                        showLoginNeeded(true, worker);
+                    }
+                }
+                if (ImGui::MenuItem("Edit Item Properties")) {
+                    if (validateLogin(currentLoginToken, worker) == success)showEditItem = true;
+                    else
+                    {
+                        showLoginNeeded(true, worker);
+                    }
+                }
+                ImGui::EndMenu();
+            }
+            if (BeginMenu("Statistics")) {
+                if (MenuItem("Yearly")) {
+                    if (validateLogin(currentLoginToken, guest) == success)showYealystat = true;
+                    else
+                    {
+                        showLoginNeeded(true, guest);
+                    }
+
+                }
+                if (MenuItem("Monthly")) {
+                    if (validateLogin(currentLoginToken, guest) == success)showMonthlystat = true;
+                    else
+                    {
+                        showLoginNeeded(true, guest);
+                    }
+                }
+                if (MenuItem("Weekly")) {
+                    if (validateLogin(currentLoginToken, guest) == success)showWeeklystat = true;
+                    else
+                    {
+                        showLoginNeeded(true, guest);
+                    }
+                }
+                ImGui::EndMenu();
+            }
+            if (BeginMenu("Management")) {
+                if (MenuItem("User management")) {
+                    if(validateLogin(currentLoginToken,admin) == success)
+                    showUsermanage = true;
+                    else {
+                        showLoginNeeded(true, admin);
+                    }
+                }
+                if (MenuItem("Open logs")) {
+                    if (validateLogin(currentLoginToken, admin) == success)
+                        showLogwindow = true;
+                    else {
+                        showLoginNeeded(true, admin);
+                    }
+                }
+                if (MenuItem("Select database")) {
+                    if (validateLogin(currentLoginToken, admin) == success)
+                        showDatabaseSelection = true;
+                    else {
+                        showLoginNeeded(true,admin);
+                    }
+                }
+                ImGui::EndMenu();
+            }
+            if (BeginMenu("Save & Exit")) {
+                if (MenuItem("Save And Exit")) {
+
+                }
+                if (MenuItem("Exit without saving")) {
+
+                }
+                ImGui::EndMenu();
+            }
+            EndMainMenuBar();
+        }
+        showLoginNeeded();
+        showAbout();
         
         if (!isloggedin) {
             SetNextWindowSize(windowsize_login);
@@ -97,34 +241,7 @@ int main(int, char**)
 
             Begin("Login");//Login window
             {
-                if (BeginMainMenuBar()) {
-                    if (BeginMenu("About")) {
-                        if (Button("About this program....")) 
-                            OpenPopup("About Window");
 
-                        
-                        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-                        if (ImGui::BeginPopupModal("About Window", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-                        {
-                            ImGui::Text("This is a demonstration of a very simple stock manager program.\nThe GUI is based on dear-ImGUI ,MIT LICENSE.\nFor homework use only.\n");
-                            ImGui::Separator();
-                            ImGui::Text("Author : Lin JiaYin\nClass: 0140");
-                            //static int unused_i = 0;
-                            //ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
-
-                            static bool dont_ask_me_next_time = false;
-                            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
-                            if (ImGui::Button("I got it")) {
-                                CloseCurrentPopup();
-                            }
-                            ImGui::PopStyleVar();
-
-                            ImGui::EndPopup();
-                        }
-                        ImGui::EndMenu();
-                    }
-                }
-                EndMainMenuBar();
             }
             End();
 
@@ -298,4 +415,53 @@ bool RenderGUI(ImVec4 clear_color) {
     g_pSwapChain->Present(1, 0); // Present with vsync
     //g_pSwapChain->Present(0, 0); // Present without vsync
     return true;
+}
+
+void showLoginNeeded(bool isopen, userType requiredType) {
+    static bool opened = false;
+    static userType usrType = requiredType;
+    static  map<userType, const char*> titles = { {guest,"Login Needed!"},{worker,"Privellege Required!"},{admin,"Privellege Required!"} };
+    static  map<userType, const char*> contents = { {guest,"You need to at least login as guest to perform thisn operation."},{worker,"You need the privellege of worker or above \nto perform this operation."},{admin,"You need administration privellege to \nperform this operation."} };
+    if(isopen)usrType = requiredType;
+    if (isopen)opened = true;
+    if (opened) {
+        OpenPopup(titles[usrType]);
+    }
+    if (BeginPopupModal(titles[usrType], NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        Text(contents[usrType]);
+        Separator();
+        PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 3));
+        if (Button("Got it")) {
+            CloseCurrentPopup();
+            opened = false;
+        }
+        PopStyleVar();
+        EndPopup();
+    }
+}
+void showAbout(bool isopen) {
+    static bool opened = false;
+    if (isopen)opened = true;
+    if (opened) {
+        OpenPopup("About Me");
+    }
+    if (BeginPopupModal("About Me", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        Text("This is just an about_me.\nContenet to be added.\n");
+        Separator();
+        PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(3, 3));
+        if (Button("Got it")) {
+            CloseCurrentPopup();
+            opened = false;
+        }
+        PopStyleVar();
+        EndPopup();
+    }
+}
+result validateLogin(loginToken token,userType type) {
+    result res = success;
+    if (!token.valid)return unknown_error;
+    if (token.login_time > (unsigned)time(NULL))return unknown_error;
+    if (token.usertype != type)return bad_privilege;
+    if ((res = StockMan.findUser(token.userid)) != success)return res;
+    return res;
 }
