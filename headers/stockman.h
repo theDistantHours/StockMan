@@ -68,7 +68,6 @@ struct stockCategory :public data {
     uid type_id;
     string type_name;
     string type_desc;
-    int durance;
 
     result write(fstream) override;
     result load(fstream) override;
@@ -148,6 +147,7 @@ public:
     result addCategory(stockCategory type,loginToken token, string comment = "No comment");
     result addAttr(stockAttr attr, loginToken token, string comment = "No comment");
     result removeCategory(uid id, loginToken token, string comment = "No comment");
+    result editCategory(uid id, string name, string desc = "No comment");
     result removeCategory(string name, loginToken token, string comment = "No comment");
     result removeAttr(uid id, loginToken token, string comment = "No comment");
     result removeAttr(string name, loginToken token, string comment = "No comment");

@@ -59,6 +59,8 @@ void ShowStockDetail(bool opt);
 void ShowStockManage(bool opt);
 void ShowOverView(bool opt);
 
+//this is a modal
+
 
 result validateLogin(loginToken token, userType type);
 
@@ -66,11 +68,35 @@ result validateLogin(loginToken token, userType type);
 void showLoginNeeded(bool isopen = false, userType requiredType = guest);
 void showAbout(bool isopen = false);
 
+void showAddCategory(bool isopen = false);
+void showRemoveCategory(uid id = 0, bool isopen = false);
+void showEditCategory(uid id = 0, bool isopen = false);
+
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 stockMan StockMan;
 static ImVec2 vec_content = ImVec2(920, 720);
 static ImGuiWindowFlags wndflg_content = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+static bool isloggedin = false;
+static bool showloginwindow = true;
+static bool showregisterwindow = false;
+
+static bool showInStockWindow = false;
+
+static bool showEditUser = false;
+static bool showLoginWindow = false;
+static bool showYealystat = false;
+static bool showMonthlystat = false;
+static bool showWeeklystat = false;
+static bool showUsermanage = false;
+static bool showLogwindow = false;
+static bool showDatabaseSelection = false;
+static bool showStockManage = false;
+
+static bool showOverview = true;
+static bool refresh_required = true;
+
+static loginToken currentLoginToken;
 
 
 // Main code
@@ -113,29 +139,12 @@ int main(int, char**)
 
 #pragma region UILogic
 
-        static bool isloggedin = false;
-        static bool showloginwindow = true;
-        static bool showregisterwindow = false;
 
-        static bool showInStockWindow = false;
-
-        static bool showEditUser = false;
-        static bool showLoginWindow = false;
-        static bool showYealystat = false;
-        static bool showMonthlystat = false;
-        static bool showWeeklystat = false;
-        static bool showUsermanage = false;
-        static bool showLogwindow = false;
-        static bool showDatabaseSelection = false;
-        static bool showStockDetail = false;
-        static bool showStockManage = false;
-
-        static bool showOverview = true;
 
         static ImVec2 windowsize_login = ImVec2(700, 300);
         static ImVec2 windowpos_login = ImVec2(300, 150);
         static ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-        static loginToken currentLoginToken;
+        
 
         PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
         PushFont(fontmap[normal][text][regular]);
@@ -332,12 +341,6 @@ int main(int, char**)
                             showLogwindow = true;
                         }
                     }
-                    if (Button("View Stock \n    Detail", ImVec2(300, 137))) {
-                        if (!validateLogin(currentLoginToken, worker))showLoginNeeded(1, worker);
-                        else {
-                            showStockDetail = true;
-                        }
-                    }
                     if (Button("Manage Stock \n       Info", ImVec2(300, 137))) {
                         if (!validateLogin(currentLoginToken, worker))showLoginNeeded(1, worker);
                         else {
@@ -361,7 +364,6 @@ int main(int, char**)
                 ShowYearlyStat(showYealystat);
                 ShowMonthlyStat(showMonthlystat);
                 ShowWeeklyStat(showWeeklystat);
-                ShowStockDetail(showStockDetail);
                 ShowStockManage(showStockManage);
             }
             End();
@@ -589,6 +591,148 @@ void showAbout(bool isopen) {
         EndPopup();
     }
 }
+void showAddCategory(bool isopen)
+{
+    static bool opened = false;
+    static result res = success;
+    static string hint;
+    if (isopen)opened = true;
+    if (opened) {
+        OpenPopup("add category");
+        BeginPopupModal("add category", NULL, wndflg_content);
+        {
+            static stockCategory dest;
+            static char catename[32];
+            static char catedesc[64];
+            static char com[64];
+            static int dur = 0;
+            InputText("Category name", catename, 32);
+            InputText("Category description", catedesc, 64);
+            InputText("Comment", com, 64);
+            Separator();
+            if (res != success) {
+                Text(hint.c_str());
+                SameLine();
+                if (Button("Got it")) {
+                    res = success;
+                }
+                Separator();
+            }
+            else {
+                if (Button("Confirm")) {
+                    dest.type_name = string(catename);
+                    dest.type_desc = string(catedesc);
+
+                    static result res = StockMan.addCategory(dest, currentLoginToken, string(com));
+                    if (res == success) {
+                        opened = false;
+                        CloseCurrentPopup();
+                    }
+                    else {
+                        switch (res)
+                        {
+                        case category_already_exist:
+                            hint = "This category already exists.Change a name!";
+                            break;
+                        default:
+                            hint = "Unknown error occured.Retry or restart program.";
+                            break;
+                        }
+                    }
+
+                }
+                SameLine();
+                if (Button("Cancle")) {
+                    opened = false;
+                    CloseCurrentPopup();
+                }
+            }
+                
+        }
+        EndPopup();
+    }
+}
+void showRemoveCategory(uid id, bool isopen)
+{
+    static uid dest_id;
+    static bool opened = false;;
+    if (isopen) {
+        opened = true;
+        dest_id = id;
+    }
+    if (opened) {
+        OpenPopup("remove category");
+        BeginPopupModal("remove category", NULL, wndflg_content);
+        {
+            Text("Are you sure to remove category %s?\nAll items inside it will be deleted.\nThis operation cannot be undone.",StockMan.getCategoryName(dest_id).c_str());
+            static char comment[32];
+            static string strcomment;
+            InputText("(Enter your comment here)", comment, 32);
+            if (Button("Yes")) {
+                refresh_required = true;
+                strcomment = string(comment);
+                if (strcomment.size() == 0)strcomment = "No comment";
+                StockMan.removeCategory(dest_id, currentLoginToken, string(comment));
+                opened = false;
+                CloseCurrentPopup();
+            }
+            SameLine();
+            if (Button("No")) {
+                opened = false;
+                CloseCurrentPopup();
+            }
+        }
+        EndPopup();
+    }
+    
+}
+void showEditCategory(uid id, bool isopen)
+{
+    static bool opened = false;
+    static result res = success;
+    static string hint = "no hint";
+    static uid dest = 0;
+    if (isopen) {
+        dest = id;
+        opened = true;
+    }
+    if (opened) {
+        OpenPopup("rename category");
+        BeginPopupModal("rename category");
+        {
+            static char name[32];
+            static char desc[64];
+            SameLine();
+            InputText("Enter new name", name, 32);
+            InputText("Enter new description", desc, 64);
+            if (res == success) {
+                if (Button("Confirm")) {
+                    res = StockMan.editCategory(dest, string(name), string(desc));
+                    if (res != success) {
+                        if (res == category_already_exist) {
+                            hint = "Category name already exist.Change one.";
+                        }
+                        else hint = "Unknown error";
+                    }
+                }
+                SameLine();
+                if (Button("Cancel")) {
+                    opened = false;
+                    CloseCurrentPopup();
+                }
+            }
+            else {
+                Text(hint.c_str());
+                if (Button("Got it")) {
+                    res = success;
+                    hint = "";
+                }
+            }
+            
+        }
+        EndPopup();
+    }
+}
 result validateLogin(loginToken token, userType type) {
     result res = success;
     if (!token.valid)return unknown_error;
@@ -668,16 +812,22 @@ void ShowStockDetail(bool opt) {
 }
 void ShowStockManage(bool opt) {
     if (opt) {
-        static vector<tuple<uid, string, bool>> Attributes;
-        static vector<tuple<uid, string>> Categories;
+        static vector<stockAttr> Attributes;
+        static vector<bool*> check;
+        static vector<stockCategory> Categories;
         static vector<stockItem> current_items;
 
         static uid current_cate;
         static vector<uid> current_attrs;
-        static bool refresh = true;
-        if (refresh) {
-
-            refresh = false;
+        if (refresh_required) {
+            current_items = StockMan.getItems(current_cate, current_attrs);
+            check.resize(Attributes.size());
+            for (int i = 0; i < check.size(); i++) {
+                check[i] = new bool;
+                *check[i] = true;
+            }
+            Categories = StockMan.getCategories();
+            Attributes = StockMan.getAttributes();
         }
 
         BeginChild("Stock Management", vec_content, true, wndflg_content);
@@ -688,9 +838,21 @@ void ShowStockManage(bool opt) {
             static ImVec2 vec_button = ImVec2(280, 100);
             int sz = Categories.size();
             for (int i = 0; i < sz; i++) {
-                tuple<uid, string> current = Categories[i];
-                if (Button(get<1>(current).c_str(), vec_button)) {
-                    current_cate = get<0>(current);
+                stockCategory current = Categories[i];
+                if (Button(current.type_name.c_str(), vec_button)) {
+                    current_cate = current.type_id;
+                }
+                if (BeginPopupContextItem((string("category_") + to_string(i)).c_str())) {
+                    if (Selectable("Add category")) {
+                        showAddCategory(true);
+                    }
+                    if (Selectable("Remove cateogry")) {
+                        showRemoveCategory(current.type_id,true);
+                    }
+                    if (Selectable("Edit category")) {
+                        showEditCategory(current.type_id, true);
+                    }
+                    EndPopup();
                 }
             }
         }
@@ -704,7 +866,7 @@ void ShowStockManage(bool opt) {
             {
                 int sz = Attributes.size();
                 for (int i = 0; i < sz; i++) {
-                    Checkbox(get<1>(Attributes[i]).c_str(), &get<2>(Attributes[i]));
+                    Checkbox(Attributes[i].attr_name.c_str(), check[i]);
                 }
             }
             EndChild();
@@ -712,8 +874,24 @@ void ShowStockManage(bool opt) {
             BeginChild("inner stock content", vec_innercontent, false);
             {
                 int sz = current_items.size();
+                BeginTable("content_table", 4);
                 for (int i = 0; i < sz; i++) {
-                    
+                    TableNextColumn();
+                    if (Selectable(current_items[i].item_name.c_str())) {
+
+                    }
+                    if (BeginPopupContextItem((string("itemview_") + to_string(i)).c_str())) {
+                        if (Selectable("view details")) {
+
+                        }
+                        if (Selectable("remove item")) {
+
+                        }
+                        if (Selectable("edit information")) {
+
+                        }
+                        EndPopup();
+                    }
                 }
             }
             EndChild();
