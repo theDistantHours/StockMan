@@ -1,6 +1,4 @@
 // Dear ImGui: standalone example application for DirectX 11
-// If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
-// Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -12,13 +10,21 @@
 #include <d3d11.h>
 #include <tchar.h>
 
+using namespace ImGui;
+
+enum fontStyle { default, normal, literal };
+enum fontSize { text, caption, header };
+enum fontWeight { regular, medium, bold };
+
+static map <fontStyle, map<fontSize, map<fontWeight, ImFont*>>> fontmap;
+
 // Data
 static ID3D11Device* g_pd3dDevice = NULL;
 static ID3D11DeviceContext* g_pd3dDeviceContext = NULL;
 static IDXGISwapChain* g_pSwapChain = NULL;
 static ID3D11RenderTargetView* g_mainRenderTargetView = NULL;
-static HWND g_hwnd;
-static WNDCLASSEX g_wcex;
+static HWND                     g_hwnd;
+static WNDCLASSEX               g_wcex;
 
 // Forward declarations of helper functions
 bool CreateDeviceD3D(HWND hWnd);
@@ -29,20 +35,44 @@ void CleanupRenderTarget();
 
 bool InitGraphics();
 void CloseGraphics();
+
+
 bool RenderGUI(ImVec4 clear_color);
+void TextCenter(string str) {
+    float fontsize = GetFontSize() * str.size() / 2;
+    SetCursorPosX(GetWindowContentRegionWidth() / 2 - fontsize / 2);
+    Text(str.c_str());
+}
+bool ButtonCenter(string str) {
+    float fontsize = GetFontSize() * str.size() / 2;
+    SetCursorPosX(GetWindowContentRegionWidth() / 2 - fontsize / 2);
+    return Button(str.c_str());
+}
+
+void ShowLogWindow(bool opt);
+void ShowInStockWindow(bool opt);
+void ShowEditUser(bool opt);
+void ShowYearlyStat(bool opt);
+void ShowMonthlyStat(bool opt);
+void ShowWeeklyStat(bool opt);
+void ShowStockDetail(bool opt);
+void ShowStockManage(bool opt);
+void ShowOverView(bool opt);
 
 
 result validateLogin(loginToken token, userType type);
 
 //Modal helper functions
-void showLoginNeeded(bool isopen = false,enum userType requiredType = guest);
+void showLoginNeeded(bool isopen = false, userType requiredType = guest);
 void showAbout(bool isopen = false);
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 stockMan StockMan;
+static ImVec2 vec_content = ImVec2(920, 720);
+static ImGuiWindowFlags wndflg_content = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 
-using namespace ImGui;
+
 // Main code
 int main(int, char**)
 {
@@ -53,10 +83,7 @@ int main(int, char**)
 
     bool logged_in = false;
 
-
-
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
 
     // Main loop
     bool done = false;
@@ -84,13 +111,7 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-
-
-
-
 #pragma region UILogic
-
-
 
         static bool isloggedin = false;
         static bool showloginwindow = true;
@@ -98,11 +119,7 @@ int main(int, char**)
 
         static bool showInStockWindow = false;
 
-        static bool showAddCategory = false;
-        static bool showAddAttr = false;
-        static bool showAddItem = false;
-        static bool showEditItem = false;
-        static bool showUserList = false;
+        static bool showEditUser = false;
         static bool showLoginWindow = false;
         static bool showYealystat = false;
         static bool showMonthlystat = false;
@@ -110,13 +127,19 @@ int main(int, char**)
         static bool showUsermanage = false;
         static bool showLogwindow = false;
         static bool showDatabaseSelection = false;
+        static bool showStockDetail = false;
+        static bool showStockManage = false;
 
-        static ImVec2 windowsize_login = ImVec2(800, 600);
-        static ImVec2 windowpos_login = ImVec2(250, 50);
+        static bool showOverview = true;
+
+        static ImVec2 windowsize_login = ImVec2(700, 300);
+        static ImVec2 windowpos_login = ImVec2(300, 150);
         static ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         static loginToken currentLoginToken;
 
-        
+        PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+        PushFont(fontmap[normal][text][regular]);
+
         if (BeginMainMenuBar()) {
 
             if (BeginMenu("About")) {
@@ -125,46 +148,45 @@ int main(int, char**)
                 ImGui::EndMenu();
             }
             if (BeginMenu("In/Out")) {
-                if (MenuItem("In Stock.")) {
+                if (MenuItem("In Stock")) {
                     if (validateLogin(currentLoginToken, worker) == success)
                         showInStockWindow = true;
                     else
-                        showLoginNeeded(true,worker);
-
+                        showLoginNeeded(true, worker);
                 }
                 if (MenuItem("Out Stock")) {
                     if (validateLogin(currentLoginToken, worker) == success)
                         showInStockWindow = true;
                     else
-                        showLoginNeeded(true,worker);
+                        showLoginNeeded(true, worker);
 
                 }
                 ImGui::EndMenu();
             }
             if (BeginMenu("Edit")) {
                 if (ImGui::MenuItem("Add/Remove Category")) {
-                    if (validateLogin(currentLoginToken, worker) == success)showAddCategory = true;
+                    if (validateLogin(currentLoginToken, worker) == success)showStockManage = true;
                     else
                     {
                         showLoginNeeded(true, worker);
                     }
                 }
                 if (ImGui::MenuItem("Add/Remove Attribute")) {
-                    if (validateLogin(currentLoginToken, worker)==success)showAddCategory = true;
+                    if (validateLogin(currentLoginToken, worker) == success)showStockManage = true;
                     else
                     {
                         showLoginNeeded(true, worker);
                     }
                 }
                 if (ImGui::MenuItem("Add/Remove Items")) {
-                    if (validateLogin(currentLoginToken, worker) == success)showAddItem = true;
+                    if (validateLogin(currentLoginToken, worker) == success)showStockManage = true;
                     else
                     {
                         showLoginNeeded(true, worker);
                     }
                 }
                 if (ImGui::MenuItem("Edit Item Properties")) {
-                    if (validateLogin(currentLoginToken, worker) == success)showEditItem = true;
+                    if (validateLogin(currentLoginToken, worker) == success)showStockManage = true;
                     else
                     {
                         showLoginNeeded(true, worker);
@@ -199,8 +221,8 @@ int main(int, char**)
             }
             if (BeginMenu("Management")) {
                 if (MenuItem("User management")) {
-                    if(validateLogin(currentLoginToken,admin) == success)
-                    showUsermanage = true;
+                    if (validateLogin(currentLoginToken, admin) == success)
+                        showUsermanage = true;
                     else {
                         showLoginNeeded(true, admin);
                     }
@@ -216,7 +238,7 @@ int main(int, char**)
                     if (validateLogin(currentLoginToken, admin) == success)
                         showDatabaseSelection = true;
                     else {
-                        showLoginNeeded(true,admin);
+                        showLoginNeeded(true, admin);
                     }
                 }
                 ImGui::EndMenu();
@@ -234,20 +256,121 @@ int main(int, char**)
         }
         showLoginNeeded();
         showAbout();
-        
+
         if (!isloggedin) {
             SetNextWindowSize(windowsize_login);
             SetNextWindowPos(windowpos_login);
 
-            Begin("Login");//Login window
+            Begin("Login");//Show Login window
             {
+                static char username[32] = "";
+                static char password[32] = "";
+                PushFont(fontmap[normal][header][regular]);
+                BeginChild("Title", ImVec2(windowsize_login.x, windowsize_login.y * 0.2f));
+                {
+                    TextCenter("Stock Manager Program");
+                }
+                EndChild();
+                Separator();
 
+                BeginChild("LoginWindowContent", ImVec2(GetWindowContentRegionWidth() * 0.6f, windowsize_login.y * 0.63f), true);
+                {
+                    SetCursorPosY(30);
+                    PushFont(fontmap[normal][text][regular]);
+                    SetCursorPosX(50);
+                    Text("Enter username:");
+                    SetCursorPosX(50);
+                    InputText(" ", username, 32);
+                    SetCursorPosX(50);
+                    Text("Enter password:");
+                    SetCursorPosX(50);
+                    InputText("  ", password, 32, ImGuiInputTextFlags_Password);
+                    PopFont();
+                }
+                EndChild();
+                SameLine();
+                BeginChild("Caption", ImVec2(GetWindowContentRegionWidth() * 0.39f, windowsize_login.y * 0.63f), true);
+                {
+                    SetCursorPos(ImVec2(80, 40));
+                    PushFont(fontmap[normal][caption][regular]);
+                    if (Button("Login", ImVec2(100, 40))) {
+                        isloggedin = true;
+                    }
+                    SetCursorPos(ImVec2(80, 85));
+                    if (Button("Register", ImVec2(100, 40))) {
+
+                    }
+                    PopFont();
+                }
+                EndChild();
+                PopFont();
             }
             End();
 
         }
+        else {
+            ImGuiWindowFlags wndFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
+            SetNextWindowPos(ImVec2(0, 25));
+            SetNextWindowSize(ImVec2(1280, 775));
+            Begin("BackgroundWindow", NULL, wndFlags);
+            {
+                //Background
+                BeginChild("bg_left", ImVec2(320, 720), true);
+                {
+                    PushFont(fontmap[normal][header][regular]);
+                    if (Button("In/Out Stock", ImVec2(300, 137))) {
+                        if (!validateLogin(currentLoginToken, worker))showLoginNeeded(1, worker);
+                        else {
+                            showInStockWindow = true;
+                        }
+                    }
+                    if (Button("View Log", ImVec2(300, 137))) {
+                        if (!validateLogin(currentLoginToken, admin)) 
+                            showLoginNeeded(1, admin);
+                        
+                        else {
+                            showLogwindow = true;
+                        }
+                    }
+                    if (Button("View Stock \n    Detail", ImVec2(300, 137))) {
+                        if (!validateLogin(currentLoginToken, worker))showLoginNeeded(1, worker);
+                        else {
+                            showStockDetail = true;
+                        }
+                    }
+                    if (Button("Manage Stock \n       Info", ImVec2(300, 137))) {
+                        if (!validateLogin(currentLoginToken, worker))showLoginNeeded(1, worker);
+                        else {
+                            showStockManage = true;
+                        }
+                    }
+                    if (Button("Manage Users\n &Database", ImVec2(300, 137))) {
+                        if (!validateLogin(currentLoginToken, admin))showLoginNeeded(1, admin);
+                        else {
+                            showEditUser = true;
+                        }
+                    }
+                    PopFont();
+                }
+                EndChild();
+                SameLine();
+                ShowOverView(showOverview);
+                ShowLogWindow(showLogwindow);
+                ShowInStockWindow(showInStockWindow);
+                ShowEditUser(showEditUser);
+                ShowYearlyStat(showYealystat);
+                ShowMonthlyStat(showMonthlystat);
+                ShowWeeklyStat(showWeeklystat);
+                ShowStockDetail(showStockDetail);
+                ShowStockManage(showStockManage);
+            }
+            End();
+        }
 
 #pragma endregion
+        PopFont();
+        ImGui::PopStyleVar();
+
 
         // Render the GUI and draw it onto the window
         if (!RenderGUI(clear_color))return 1;
@@ -375,6 +498,7 @@ bool InitGraphics() {
     ImGui_ImplWin32_Init(g_hwnd);
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
+    ImFontConfig fontconfig;
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
     // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
@@ -382,8 +506,14 @@ bool InitGraphics() {
     // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
+    fontmap[default][text][regular] = io.Fonts->AddFontDefault();
+
+    fontmap[normal][text][regular] = io.Fonts->AddFontFromFileTTF("./misc/fonts/refsan.ttf", 18.0f);
+    fontmap[normal][caption][regular] = io.Fonts->AddFontFromFileTTF("./misc/fonts/refsan.ttf", 22.0f);
+    fontmap[normal][header][regular] = io.Fonts->AddFontFromFileTTF("./misc/fonts/refsan.ttf", 40.0f);
+
+
+
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
@@ -393,7 +523,9 @@ bool InitGraphics() {
 
 }
 void CloseGraphics() {
+
     // Cleanup
+
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
@@ -421,8 +553,8 @@ void showLoginNeeded(bool isopen, userType requiredType) {
     static bool opened = false;
     static userType usrType = requiredType;
     static  map<userType, const char*> titles = { {guest,"Login Needed!"},{worker,"Privellege Required!"},{admin,"Privellege Required!"} };
-    static  map<userType, const char*> contents = { {guest,"You need to at least login as guest to perform thisn operation."},{worker,"You need the privellege of worker or above \nto perform this operation."},{admin,"You need administration privellege to \nperform this operation."} };
-    if(isopen)usrType = requiredType;
+    static  map<userType, const char*> contents = { {guest,"You need to at least login as guest to perform this operation.\n"},{worker,"You need the privellege of worker or above \nto perform this operation.\n"},{admin,"You need administration privellege to \nperform this operation.\n"} };
+    if (isopen)usrType = requiredType;
     if (isopen)opened = true;
     if (opened) {
         OpenPopup(titles[usrType]);
@@ -457,11 +589,172 @@ void showAbout(bool isopen) {
         EndPopup();
     }
 }
-result validateLogin(loginToken token,userType type) {
+result validateLogin(loginToken token, userType type) {
     result res = success;
     if (!token.valid)return unknown_error;
     if (token.login_time > (unsigned)time(NULL))return unknown_error;
-    if (token.usertype != type)return bad_privilege;
+    switch (type)
+    {
+    case guest:
+        break;
+    case worker:
+        if (token.usertype == guest)return bad_privilege;
+        break;
+    case admin:
+        if (token.usertype != admin)return bad_privilege;
+        break;
+    default:
+        break;
+    }
     if ((res = StockMan.findUser(token.userid)) != success)return res;
     return res;
+}
+
+
+void ShowLogWindow(bool opt) {
+    if (opt) {
+        BeginChild("Recent logs", vec_content, true, wndflg_content);
+        //have a look how to create charts
+        EndChild();
+    }
+
+}
+
+void ShowInStockWindow(bool opt) {
+    if (opt) {
+        BeginChild("In/Out Stock", vec_content, true, wndflg_content);
+
+        EndChild();
+    }
+}
+
+void ShowEditUser(bool opt) {
+    if (opt) {
+        BeginChild("Edit Users", vec_content, true, wndflg_content);
+
+        EndChild();
+    }
+}
+
+void ShowYearlyStat(bool opt) {
+    if (opt) {
+        BeginChild("Yearly Statistics", vec_content, true, wndflg_content);
+
+        EndChild();
+    }
+}
+
+void ShowMonthlyStat(bool opt) {
+    if (opt) {
+        BeginChild("Monthly Statistics", vec_content, true, wndflg_content);
+
+        EndChild();
+    }
+}
+
+void ShowWeeklyStat(bool opt) {
+    if (opt) {
+        BeginChild("Weekly Statistics", vec_content, true, wndflg_content);
+
+        EndChild();
+    }
+}
+void ShowStockDetail(bool opt) {
+    if (opt) {
+        BeginChild("Stock Details", vec_content, true, wndflg_content);
+
+        EndChild();
+    }
+}
+void ShowStockManage(bool opt) {
+    if (opt) {
+        static vector<tuple<uid, string, bool>> Attributes;
+        static vector<tuple<uid, string>> Categories;
+        static vector<stockItem> current_items;
+
+        static uid current_cate;
+        static vector<uid> current_attrs;
+        static bool refresh = true;
+        if (refresh) {
+
+            refresh = false;
+        }
+
+        BeginChild("Stock Management", vec_content, true, wndflg_content);
+        static ImVec2 vec_content2 = ImVec2(300, 700);
+        BeginChild("Stock Categories", vec_content2, false);
+        {
+            
+            static ImVec2 vec_button = ImVec2(280, 100);
+            int sz = Categories.size();
+            for (int i = 0; i < sz; i++) {
+                tuple<uid, string> current = Categories[i];
+                if (Button(get<1>(current).c_str(), vec_button)) {
+                    current_cate = get<0>(current);
+                }
+            }
+        }
+        EndChild();
+        static ImVec2 vec_content3 = ImVec2(400, 700);
+        BeginChild("Stock content", vec_content3, false);
+        {
+            static ImVec2 vec_checkbox = ImVec2(380, 100);
+            static ImVec2 vec_innercontent = ImVec2(380, 500);
+            BeginChild("Checkbox", vec_checkbox, false);
+            {
+                int sz = Attributes.size();
+                for (int i = 0; i < sz; i++) {
+                    Checkbox(get<1>(Attributes[i]).c_str(), &get<2>(Attributes[i]));
+                }
+            }
+            EndChild();
+            Separator();
+            BeginChild("inner stock content", vec_innercontent, false);
+            {
+                int sz = current_items.size();
+                for (int i = 0; i < sz; i++) {
+                    
+                }
+            }
+            EndChild();
+        }
+        EndChild();
+
+        EndChild();
+    }
+}
+void ShowOverView(bool opt) {
+    if (opt) {
+        static bool isfirstopen = true;
+        if (isfirstopen) {
+            //refresh overview here
+        }
+        BeginChild("OverView", vec_content, true, wndflg_content);
+        static vector<tuple<infoType, stockCategory, stockItem, int, int>> info;
+        int sz = info.size();
+        for (int i = 0; i < sz; i++) {
+            BeginChild(i * 667, ImVec2(900, 200), true);
+            {
+                switch (get<0>(info[i]))
+                {
+                case outdate:
+                    Text("Item %s %s is partially out of durance.\nMax-durance: %d ,outdatad items count: %d", get<1>(info[i]).type_name.c_str(), get<2>(info[i]).item_name.c_str(), get<3>(info[i]), get<4>(info[i]));
+                    break;
+                case notenough:
+                    Text("Item %s %s is around empty.\nCurrent remaining: %d ,Minimun required: %d\nPlease add in time.", get<1>(info[i]).type_name.c_str(), get<2>(info[i]).item_name.c_str(), get<3>(info[i]), get<4>(info[i]));
+                    break;
+                case full:
+                    Text("Item %s %s is already full.\nCurrent count: %d\nMax-capacity: %d", get<1>(info[i]).type_name.c_str(), get<2>(info[i]).item_name.c_str(), get<3>(info[i]), get<4>(info[i]));
+                    break;
+                default:
+                    break;
+                }
+            }
+            EndChild();
+        }
+        if (Button("refresh")) {
+              //
+        }
+        EndChild();
+    }
 }

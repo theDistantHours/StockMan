@@ -8,6 +8,9 @@ using namespace std;
 enum userType {
     guest, worker, admin
 };
+enum infoType {
+    full,notenough,outdate
+};
 enum operationType {
     ADD, REMOVE, QUERY, LOGIN
 };
@@ -23,6 +26,7 @@ struct stockItem;
 struct loginToken;
 struct queryResultItems;
 struct queryOptions;
+struct stockBrief;
 class stockMan;
 class logMan;
 class statMan;
@@ -74,6 +78,9 @@ struct stockItem :public data {
     uid id;
     vector<stockCategory> types;
     vector<stockAttr> attrs;
+    string item_name;
+    string item_desc;
+
     int price;
     int durance;
 
@@ -115,6 +122,7 @@ private:
 
 class stockMan {
 public:
+    result loadConfig(string filename);
     result loadDatafromFile(string filename);
     result saveData();
     result saveDataAs(string filename);
@@ -149,6 +157,8 @@ public:
 
     result InStock(string name, int count, int durance, loginToken token,string comment ="No comment");
     result InStock(uid id, int count, int durance, loginToken token,string comment="No comment");
+
+    vector<stockItem> getItems(uid category, vector<uid> attrs);
 
 
     result log(time_t time, uid userid, operationType opType, operationTarget opTarget, int value);

@@ -79,6 +79,11 @@ result statMan::load(fstream)
     return result();
 }
 
+result stockMan::loadConfig(string filename)
+{
+    return result();
+}
+
 result stockMan::loadDatafromFile(string filename)
 {
     return result();
@@ -209,6 +214,11 @@ result stockMan::InStock(string name, int count, int durance, loginToken token, 
 result stockMan::InStock(uid id, int count, int durance, loginToken token, string comment)
 {
     return result();
+}
+
+vector<stockItem> stockMan::getItems(uid category, vector<uid> attrs)
+{
+    return vector<stockItem>();
 }
 
 result stockMan::log(time_t time, uid userid, operationType opType, operationTarget opTarget, int value)
