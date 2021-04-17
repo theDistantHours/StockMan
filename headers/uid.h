@@ -1,6 +1,6 @@
 #pragma once
 #include "commons.h"
-typedef int uid;
+typedef long long uid;
 
 uid newuid(void);
 uid removeuid(uid id);

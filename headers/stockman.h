@@ -9,13 +9,13 @@ enum userType {
     guest, worker, admin
 };
 enum infoType {
-    full,notenough,outdate
+    full, notenough, outdate
 };
 enum operationType {
     ADD, REMOVE, QUERY, LOGIN
 };
 enum operationTarget {
-    stock,category,attr,users
+    stock, category, attr, users
 };
 
 struct record;
@@ -38,8 +38,8 @@ struct record :public data {
     uid userid;
     uid parameter;
 
-    result write(fstream) override;
-    result load(fstream) override;
+    result write(fstream&) override;
+    result load(fstream&) override;
 };
 
 struct userInfo :public data {
@@ -51,35 +51,30 @@ struct userInfo :public data {
 
     userType privilege;
 
-    result write(fstream) override;
-    result load(fstream) override;
+    result write(fstream&) override;
+    result load(fstream&) override;
 };
 
 struct stockAttr :public data {
-    uid attr_id;
-    string attr_name;
-    string attr_desc;
+    uid id;
+    string name;
+    string desc;
 
-    result write(fstream) override;
-    result load(fstream) override;
+    result write(fstream&) override;
+    result load(fstream&) override;
 };
 
 struct stockCategory :public data {
-    uid type_id;
-    string type_name;
-    string type_desc;
+    uid id;
+    string name;
+    string desc;
 
-    result write(fstream) override;
-    result load(fstream) override;
+    result write(fstream&) override;
+    result load(fstream&) override;
 };
 
 struct stockItem :public data {
     uid id;
-    vector<stockCategory> types;
-    vector<stockAttr> attrs;
-    string item_name;
-    string item_desc;
-
     int price;
     int durance;
 
@@ -87,88 +82,89 @@ struct stockItem :public data {
     int max_count;
 
     int count;
-    vector <tuple<time_t,int>> detail;
 
-    result write(fstream) override;
-    result load(fstream) override;
+    stockCategory category;
+    
+    string name;
+    string desc;
+
+    vector<uid> attrs;
+    vector<tuple<time_t, int>> detail;
+
+    result write(fstream&) override;
+    result load(fstream&) override;
 
 };
 
-struct loginToken :public data {
+struct loginToken  {
     bool valid;
+    long userid;
     time_t login_time;
     time_t logout_time;
     userType usertype;
-    long userid;
 
-    result write(fstream) override;
-    result load(fstream) override;
-};
-
-
-class statMan :public data{
-public:
-    friend class stockMan;
-    void InStock(uid id, int count, int durance);
-    vector<vector<tuple<uid,int,int>>> getStat(tm start,tm end);
-
-    result write(fstream) override;
-    result load(fstream) override;
-private:
-    vector<vector<tuple<uid, int, int>>> stats;
 };
 
 
 class stockMan {
 public:
-    result loadConfig(string filename);
-    result loadDatafromFile(string filename);
+    result loadDatafromFile(fstream& fs);
     result saveData();
-    result saveDataAs(string filename);
+    result saveDataAs(fstream& filename);
 
     loginToken login(string username, string password);
-    bool regist(string username, string password);
-
+    loginToken getCurrentToken(void);
+    result regist(string username, string password, userType usrType = guest);
 
     vector<stockCategory> getCategories(void);
-    vector<stockAttr> getAttributes(void);
-    string getAttrName(uid id);
-    uid getAttrId(string name);
-    string getCategoryName(uid id);
-    uid getCategoryId(string name);
-    string getItemName(uid id);
-    uid getItemId(string name);
-    
-    string getUserInfo(uid id, loginToken token ,string comment = "No comment");
+    vector<stockAttr> getAttrs(void);
+    vector<stockItem> getItems(uid category, set<uid> attrs);
+    vector<userInfo> getUsers(void);
+
+    stockAttr getAttr(string name);
+    stockAttr getAttr(uid id);
+    stockCategory getCategory(string name);
+    stockCategory getCategory(uid id);
+    stockItem getItem(uid id);
+    stockItem getItem(string name);
+    userInfo getUserInfo(uid id);
 
     result findUser(uid id);
     result findUser(string name);
 
-    result addCategory(stockCategory type,loginToken token, string comment = "No comment");
-    result addAttr(stockAttr attr, loginToken token, string comment = "No comment");
-    result removeCategory(uid id, loginToken token, string comment = "No comment");
-    result editCategory(uid id, string name, string desc = "No comment");
-    result removeCategory(string name, loginToken token, string comment = "No comment");
-    result removeAttr(uid id, loginToken token, string comment = "No comment");
-    result removeAttr(string name, loginToken token, string comment = "No comment");
+    result addCategory(stockCategory type, string comment = "No comment");
+    result addAttr(stockAttr attr, string comment = "No comment");
+    result addItem(stockItem item, string comment = "No comment");
 
+    result editCategory(uid id, string name, string desc);
+    result editItem(uid id, string name, string desc,string comment = "No comment");
+    result editUser(uid id, string name, string password, userType type, string comment = "No comment");
+
+    result removeCategory(uid id, string comment = "No comment");
+    result removeAttr(uid id, string comment = "No comment");
+    result removeItem(uid id, string comment = "No comment");
     result removeUser(uid id);
-    result removeUser(string name);
 
-    result InStock(string name, int count, int durance, loginToken token,string comment ="No comment");
-    result InStock(uid id, int count, int durance, loginToken token,string comment="No comment");
+    result InStock(uid id, int count, int durance, string comment = "No comment");
+    vector<tuple<infoType, stockCategory, stockItem, int, int>> overview(void);
 
-    vector<stockItem> getItems(uid category, vector<uid> attrs);
+    stockMan() {
+        
+    }
+    stockMan(string filename) {
 
+    }
+
+private:
+    loginToken current_login_token;
+    fstream logfile;
+    fstream datfile;
+    map<uid, vector<stockItem>> data;
+    vector<stockCategory> categories;
+    vector<stockAttr> attributes;
 
     result log(time_t time, uid userid, operationType opType, operationTarget opTarget, int value);
 
-
-    statMan m_statMan;
-
-private:
-    uid current_logged_user;
-    fstream logfile;
 };
 
 
