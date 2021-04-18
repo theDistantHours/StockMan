@@ -1,9 +1,48 @@
 ﻿  main.cpp
-G:\Common\Coding\LibMan\main.cpp(40,10): warning C4189: 'show_demo_window': local variable is initialized but not referenced
-G:\Common\Coding\LibMan\main.cpp(41,10): warning C4189: 'show_another_window': local variable is initialized but not referenced
+G:\Common\Coding\Github\LibMan\headers\commons.h(27,40): warning C4100: 'file': unreferenced formal parameter
+G:\Common\Coding\Github\LibMan\headers\commons.h(30,41): warning C4100: 'file': unreferenced formal parameter
+G:\Common\Coding\Github\LibMan\main.cpp(140,10): warning C4189: 'logged_in': local variable is initialized but not referenced
+G:\Common\Coding\Github\LibMan\main.cpp(789,34): warning C4456: declaration of 'res' hides previous local declaration
+G:\Common\Coding\Github\LibMan\main.cpp(746,19): message : see declaration of 'res'
+G:\Common\Coding\Github\LibMan\main.cpp(836,30): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(907,34): warning C4456: declaration of 'res' hides previous local declaration
+G:\Common\Coding\Github\LibMan\main.cpp(823,19): message : see declaration of 'res'
+G:\Common\Coding\Github\LibMan\main.cpp(972,34): warning C4456: declaration of 'res' hides previous local declaration
+G:\Common\Coding\Github\LibMan\main.cpp(929,19): message : see declaration of 'res'
+G:\Common\Coding\Github\LibMan\main.cpp(1105,30): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1162,34): warning C4456: declaration of 'res' hides previous local declaration
+G:\Common\Coding\Github\LibMan\main.cpp(1090,19): message : see declaration of 'res'
+G:\Common\Coding\Github\LibMan\main.cpp(1395,32): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1398,31): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1420,43): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1481,30): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1561,19): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Common\Coding\Github\LibMan\main.cpp(1568,120): warning C4305: 'argument': truncation from 'double' to 'float'
+G:\Common\Coding\Github\LibMan\main.cpp(1569,123): warning C4305: 'argument': truncation from 'double' to 'float'
+G:\Common\Coding\Github\LibMan\main.cpp(1576,35): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1592,35): warning C4244: '=': conversion from '_Ty2' to 'int', possible loss of data
+          with
+          [
+              _Ty2=float
+          ]
+G:\Common\Coding\Github\LibMan\main.cpp(1594,40): warning C4244: '=': conversion from '_Ty2' to 'int', possible loss of data
+          with
+          [
+              _Ty2=float
+          ]
+G:\Common\Coding\Github\LibMan\main.cpp(1637,80): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1669,31): warning C4996: 'localtime': This function or variable may be unsafe. Consider using localtime_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+G:\Common\Coding\Github\LibMan\main.cpp(1530,35): warning C4100: 'range': unreferenced formal parameter
+G:\Common\Coding\Github\LibMan\main.cpp(1744,34): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1764,39): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1813,43): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1862,46): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1920,29): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1924,29): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+G:\Common\Coding\Github\LibMan\main.cpp(1974,31): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   Generating code
-  1 of 1050 functions (<0.1%) were compiled, the rest were copied from previous compilation.
+  8 of 3446 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    13 functions had inline decision re-evaluated but remain unchanged
+    32 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  LibMan.vcxproj -> G:\Common\Coding\LibMan\Release\LibMan.exe
+  LibMan.vcxproj -> G:\Common\Coding\Github\LibMan\Release\LibMan.exe

@@ -1,0 +1,75 @@
+ <stockman_data>  <category_definition> 5  <stockcategory> 1618759984 <name> default
+</name>  <desc> default
+</desc> 
+</stockcategory>  <stockcategory> 1618762250 <name> electric resistance
+</name>  <desc> 
+</desc> 
+</stockcategory>  <stockcategory> 1618762273 <name> electric capacity
+</name>  <desc> 
+</desc> 
+</stockcategory>  <stockcategory> 1618762297 <name> diode
+</name>  <desc> 
+</desc> 
+</stockcategory>  <stockcategory> 1618762312 <name> inductance
+</name>  <desc> 
+</desc> 
+</stockcategory> 
+</category_definition>  <attr_definition> 5  <stockattr> 1618759987  <name> default
+</name>  <desc> default
+</desc> 
+</stockattr>  <stockattr> 1618766418  <name> fragile
+</name>  <desc> 
+</desc> 
+</stockattr>  <stockattr> 1618766425  <name> metal
+</name>  <desc> 
+</desc> 
+</stockattr>  <stockattr> 1618766440  <name> no-water
+</name>  <desc> 
+</desc> 
+</stockattr>  <stockattr> 1618766451  <name> expensive
+</name>  <desc> 
+</desc> 
+</stockattr> 
+</attr_definition>  <item_data_outer> 2 <item_data_inner> 1618759984 5  <stockitem> 1618766401 1 0 1 10 5 1618759984 <name> default
+</name>  <desc> 
+</desc>  <attrs> 1 1618759987 
+</attrs>  <detail> 1 1618766588 5 
+</detail> 
+</stockitem>  <stockitem> 1618766468 1 0 1 10 5 1618759984 <name> default-fragile
+</name>  <desc> 
+</desc>  <attrs> 2 1618759987 1618766418 
+</attrs>  <detail> 1 1618766610 5 
+</detail> 
+</stockitem>  <stockitem> 1618766477 1 0 1 10 5 1618759984 <name> default-metal
+</name>  <desc> 
+</desc>  <attrs> 2 1618759987 1618766425 
+</attrs>  <detail> 1 1618766580 5 
+</detail> 
+</stockitem>  <stockitem> 1618766490 1 0 1 10 5 1618759984 <name> default-nowater
+</name>  <desc> 
+</desc>  <attrs> 2 1618759987 1618766440 
+</attrs>  <detail> 1 1618766577 5 
+</detail> 
+</stockitem>  <stockitem> 1618766502 10 0 1 10 5 1618759984 <name> default-expensive
+</name>  <desc> 
+</desc>  <attrs> 2 1618759987 1618766451 
+</attrs>  <detail> 1 1618766584 5 
+</detail> 
+</stockitem> 
+</item_data_inner>  <item_data_inner> 1618762250 0 
+</item_data_inner> 
+</item_data_outer>  <users> 3  <userinfo> 1618759979 <username> orange
+</username>  <password> orange
+</password>  <description> 
+</description> 0 a 
+</userinfo>  <userinfo> 1618766667 <username> user
+</username>  <password> user
+</password>  <description> 
+</description> 0 w 
+</userinfo>  <userinfo> 1618766682 <username> guest
+</username>  <password> guest
+</password>  <description> 
+</description> 0 g 
+</userinfo> 
+</users> 
+</stockman_data> 

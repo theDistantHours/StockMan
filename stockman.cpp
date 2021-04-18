@@ -1,10 +1,18 @@
 #include "stockman.h"
 
-string begin(string s) {
-    return " <" + s + "> ";
+string Begin(string s, bool isin = false)
+{
+    if (!isin)
+        return " <" + s + "> ";
+    else
+        return "<" + s + ">";
 }
-string end( string s,bool isin = true) {
-    return (isin ? "\n</" :" </")+ s + "> ";
+string End(string s, bool isin = false)
+{
+    if (isin)
+        return "</" + s + ">";
+    else
+        return "\n</" + s + "> ";
 }
 string& trim(std::string& s)
 {
@@ -12,39 +20,40 @@ string& trim(std::string& s)
     {
         return s;
     }
-
     s.erase(0, s.find_first_not_of(" "));
     s.erase(s.find_last_not_of(" ") + 1);
     return s;
 }
 
-string loadline(string type, fstream &file) {
+string loadline(string type, ifstream& file)
+{
     static string tmp;
     string res;
     file >> tmp;
-    if (tmp != begin(type))return "";
-    if (!getline(file, res))return "";
+    if (tmp != Begin(type, true))
+        return "";
+    if (!getline(file, res))
+        return "";
     file >> tmp;
-    if (tmp != end(type,false))return "";
+    if (tmp != End(type, true))
+        return "";
     return trim(res);
 }
 
-result record::write(fstream&)
+result record::write(ofstream&)
 {
     return result();
 }
 
-result record::load(fstream&)
+result record::load(ifstream&)
 {
     return result();
 }
 
-result userInfo::write(fstream &file)
+result userInfo::write(ofstream& file)
 {
-    file << begin("userinfo");
-    file << userid <<
-        begin("username") << username << end("username") << begin("password") << password << end("password") <<
-        begin("description") << description << end("description");
+    file << Begin("userinfo");
+    file << userid << Begin("username") << username << End("username") << Begin("password") << password << End("password") << Begin("description") << description << End("description");
     file << regdate;
     switch (this->privilege)
     {
@@ -58,352 +67,633 @@ result userInfo::write(fstream &file)
         file << " a ";
         break;
     }
-    file << end("userinfo");
+    file << End("userinfo");
     return success;
 }
 
-result userInfo::load(fstream &fs)
+result userInfo::load(ifstream& fs)
 {
     static string temp;
     fs >> temp;
-    if (temp != begin("userinfo"))return file_corrupted;
+    if (temp != Begin("userinfo", true))
+        return file_corrupted;
     fs >> userid;
     username = loadline("username", fs);
     password = loadline("password", fs);
     description = loadline("description", fs);
 
-    if (username == "" || password == "" || description == "")return file_corrupted;
+    if (username == "")
+        return file_corrupted;
     fs >> this->regdate;
     fs >> temp;
-    if (temp == "g")privilege = guest;
-    else if (temp == "w")privilege = worker;
-    else if (temp == "a")privilege = admin;
-    else return file_corrupted;
+    if (temp == "g")
+        privilege = guest;
+    else if (temp == "w")
+        privilege = worker;
+    else if (temp == "a")
+        privilege = admin;
+    else
+        return file_corrupted;
     fs >> temp;
-    if (temp != end("userinfo",false))return file_corrupted;
+    if (temp != End("userinfo", true))
+        return file_corrupted;
 
     return success;
 }
 
-result stockAttr::write(fstream &file)
+result stockAttr::write(ofstream& file)
 {
-    file << begin("stockattr") << id << " " <<
-        begin("name") << name << end("name") <<
-        begin("desc") << desc << end("desc") <<
-        end("stockattr");
+    file << Begin("stockattr") << id << " " << Begin("name") << name << End("name") << Begin("desc") << desc << End("desc") << End("stockattr");
     return success;
 }
 
-result stockAttr::load(fstream &fs)
+result stockAttr::load(ifstream& fs)
 {
     string temp;
     fs >> temp;
-    if (temp != begin("stockattr"))return file_corrupted;
-    name = loadline("name", fs);
-    desc = loadline("desc", fs);
-    fs >> temp;
-    if (temp != end("stockattr", false))return file_corrupted;
-    if (name != "" && desc != "")return success;
-}
-
-result stockCategory::write(fstream &fs)
-{
-    fs << begin("stockcategory");
-    fs << id <<
-        begin("name") << name << end("name") <<
-        begin("desc") << desc << end("desc") <<
-        end("stockcategory");
-    return success;
-}
-
-result stockCategory::load(fstream &fs)
-{
-    string temp;
-    fs >> temp;
-    if (temp != begin("stockcategory"))return file_corrupted;
+    if (temp != Begin("stockattr", true))
+        return file_corrupted;
     fs >> id;
     name = loadline("name", fs);
     desc = loadline("desc", fs);
     fs >> temp;
-    if (temp != end("stockcategory", false))return file_corrupted;
+    if (temp != End("stockattr", true))
+        return file_corrupted;
+    if (name != "")
+        return success;
+}
+
+result stockCategory::write(ofstream& fs)
+{
+    fs << Begin("stockcategory");
+    fs << id << Begin("name") << name << End("name") << Begin("desc") << desc << End("desc") << End("stockcategory");
     return success;
 }
 
-result stockItem::write(fstream &fs)
+result stockCategory::load(ifstream& fs)
 {
-    if (!fs)return unknown_error;
-    uid cate = category.id;
-    fs << begin("stockitem") <<
-        id << " " << price << " " << durance << " " << min_count << " " << max_count << " " << count << " " << cate <<
-        begin("name") << name << end("name") << begin("desc") << desc << end("desc") <<
-        begin("attrs");
-    fs << attrs.size() << " ";
-    for (int i = 0; i < attrs.size(); i++) {
-        fs << attrs[i] << " ";
-    }
-    fs << end("attrs");
-    fs << begin("detail");
-    fs << detail.size() << " ";
-    for (int i = 0; i < detail.size(); i++) {
-        fs << get<0>(detail[i]) << " " << get<1>(detail[i]) << " ";
-    }
-    fs << end("detail");
-    fs << end("stockitem");
-    return success;
-}
-
-result stockItem::load(fstream &fs)
-{
-    if (!fs)return unknown_error;
-    static string tmp;
-    static uid cate;
-    static int sz;
-    fs >> tmp;
-    if (tmp != begin("stockitem"))return file_corrupted;
-    fs >> id >> price >> durance >> min_count >> max_count >> count >> cate;
+    string temp;
+    fs >> temp;
+    if (temp != Begin("stockcategory", true))
+        return file_corrupted;
+    fs >> id;
     name = loadline("name", fs);
     desc = loadline("desc", fs);
-    fs >> tmp; if (tmp != begin("attrs"))return file_corrupted;
+    fs >> temp;
+    if (temp != End("stockcategory", true))
+        return file_corrupted;
+    return success;
+}
+
+result stockItem::write(ofstream& fs)
+{
+    if (!fs)
+        return unknown_error;
+    fs << Begin("stockitem") << id << " " << price << " " << durance << " " << min_count << " " << max_count << " " << count << " " << category << Begin("name") << name << End("name") << Begin("desc") << desc << End("desc") << Begin("attrs");
+    fs << attrs.size() << " ";
+    for (int i = 0; i < attrs.size(); i++)
+    {
+        fs << attrs[i] << " ";
+    }
+    fs << End("attrs");
+    fs << Begin("detail");
+    fs << detail.size() << " ";
+    for (int i = 0; i < detail.size(); i++)
+    {
+        fs << get<0>(detail[i]) << " " << get<1>(detail[i]) << " ";
+    }
+    fs << End("detail");
+    fs << End("stockitem");
+    return success;
+}
+
+result stockItem::load(ifstream& fs)
+{
+    if (!fs)
+        return unknown_error;
+    static string tmp;
+    static int sz;
+    fs >> tmp;
+    if (tmp != Begin("stockitem", true))
+        return file_corrupted;
+    fs >> id >> price >> durance >> min_count >> max_count >> count >> category;
+    name = loadline("name", fs);
+    desc = loadline("desc", fs);
+    fs >> tmp;
+    if (tmp != Begin("attrs", true))
+        return file_corrupted;
     fs >> sz;
-    if (sz == 0)return file_corrupted;
-    for (int i = 0; i < sz; i++) {
+    for (int i = 0; i < sz; i++)
+    {
         static uid c;
         fs >> c;
-        attrs.push_back( c);
+        attrs.push_back(c);
     }
-    fs >> tmp; if (tmp != end("attrs"))return file_corrupted;
-    fs >> sz; if (sz == 0)return file_corrupted;
-    for (int i = 0; i < sz; i++) {
+    fs >> tmp;
+    if (tmp != End("attrs", true))
+        return file_corrupted;
+    fs >> tmp;
+    if (tmp != Begin("detail", true))
+        return file_corrupted;
+    fs >> sz;
+    for (int i = 0; i < sz; i++)
+    {
         static time_t t;
         static int c;
         fs >> t >> c;
         detail.push_back(tuple<time_t, int>(t, c));
     }
     fs >> tmp;
-    if (tmp != end("detail"))return file_corrupted;
-    fs >> tmp; if (tmp != end("stockitem"))return file_corrupted;
+    if (tmp != End("detail", true))
+        return file_corrupted;
+    fs >> tmp;
+    if (tmp != End("stockitem", true))
+        return file_corrupted;
     return success;
 }
-
 
 result stockMan::saveData()
 {
-    if (!datfile.is_open())return file_corrupted;
-    datfile << begin("stockman_data");
+    datfile.open("stock_data.dat");
+    if (!datfile.is_open())
+        return file_corrupted;
+    datfile << Begin("stockman_data");
     {
-        datfile << begin("category_definition");
+        datfile << Begin("category_definition");
         datfile << categories.size() << " ";
-        for (int i = 0; i < categories.size(); i++) {
+        for (int i = 0; i < categories.size(); i++)
+        {
             categories[i].write(datfile);
         }
-        datfile << end("category_definition");
-        datfile << begin("attr_definition");
+        datfile << End("category_definition");
+        datfile << Begin("attr_definition");
         datfile << attributes.size() << " ";
-        for (int i = 0; i < attributes.size(); i++) {
+        for (int i = 0; i < attributes.size(); i++)
+        {
             attributes[i].write(datfile);
         }
-        datfile << end("attr_definition");
-        datfile << begin("item_data_outer");
-        datfile << data.size();
-        for (auto i = data.begin(); i != data.end(); i++) {
-            datfile << begin("item_data_innner");
+        datfile << End("attr_definition");
+        datfile << Begin("item_data_outer");
+        datfile << itemdata.size();
+        for (auto i = itemdata.begin(); i != itemdata.end(); i++)
+        {
+            datfile << Begin("item_data_inner");
             datfile << (*i).first << " ";
             auto vec = (*i).second;
             datfile << vec.size() << " ";
-            for (int k = 0; k < vec.size(); k++) {
+            for (int k = 0; k < vec.size(); k++)
+            {
                 vec[k].write(datfile);
             }
-            datfile << end("item_data_innner");
+            datfile << End("item_data_inner");
         }
-        datfile << end("item_data_outer");
+        datfile << End("item_data_outer");
     }
-    datfile << end("stockman_data");
+    datfile << Begin("users");
+    {
+        int sz = userdata.size();
+        datfile << sz << " ";
+        for (int i = 0; i < sz; i++)
+        {
+            userdata[i].write(datfile);
+        }
+    }
+    datfile << End("users");
+    datfile << End("stockman_data");
+    datfile.close();
 }
 
-result stockMan::loadDatafromFile(fstream &fs)
+result stockMan::loadDatafromFile(ifstream& fs)
 {
-    if (!fs.is_open())return unknown_error;
+    if (!fs.is_open())
+        return unknown_error;
     string temp;
 
     fs >> temp;
-    if (temp != begin("stockman_data"))return file_corrupted;
+    if (temp != Begin("stockman_data", true))
+        return file_corrupted;
     {
-        fs >> temp; if (temp != begin("category_definition"))return file_corrupted;
-        int catsize=0, attsize=0, itesize=0;
-        fs >> catsize; if (catsize == 0)return file_corrupted;
-        for (int i = 0; i < catsize; i++) {
+        fs >> temp;
+        if (temp != Begin("category_definition", true))
+            return file_corrupted;
+        int catsize = 0, attsize = 0, itesize = 0;
+        fs >> catsize;
+        for (int i = 0; i < catsize; i++)
+        {
             stockCategory cate_t;
-            if(cate_t.load(fs)!=success)return file_corrupted;
+            if (cate_t.load(fs) != success)
+                return file_corrupted;
             categories.push_back(cate_t);
         }
-        fs >> temp;if(temp !=end("category_definition", false))return file_corrupted;
-        fs >> temp;if(temp !=begin("attr_definition"))return file_corrupted;
-        fs >> attsize; if (attsize == 0)return file_corrupted;
-        for (int i = 0; i < attsize; i++) {
+        fs >> temp;
+        if (temp != End("category_definition", true))
+            return file_corrupted;
+        fs >> temp;
+        if (temp != Begin("attr_definition", true))
+            return file_corrupted;
+        fs >> attsize;
+        for (int i = 0; i < attsize; i++)
+        {
             stockAttr att_t;
-            if (att_t.load(fs) != success)return file_corrupted;
+            if (att_t.load(fs) != success)
+                return file_corrupted;
             attributes.push_back(att_t);
         }
-        fs >> temp;if (temp != end("attr_definition", false))return file_corrupted;
-        fs >> temp; if (temp != begin("item_data_outer"))return file_corrupted;
-        fs >> itesize; if (itesize == 0)return file_corrupted;
-        for (int i = 0; i < itesize; i++) {
-            fs >> temp; if (temp != begin("item_data_inner"))return file_corrupted;
+        fs >> temp;
+        if (temp != End("attr_definition", true))
+            return file_corrupted;
+        fs >> temp;
+        if (temp != Begin("item_data_outer", true))
+            return file_corrupted;
+        fs >> itesize;
+        for (int i = 0; i < itesize; i++)
+        {
+            fs >> temp;
+            if (temp != Begin("item_data_inner", true))
+                return file_corrupted;
             int vecsize = 0;
             uid cate_id = 0;
             fs >> cate_id;
-            fs >> vecsize; if (vecsize == 0)return file_corrupted;
-            for (int i = 0; i < vecsize; i ++ ) {
+            fs >> vecsize;
+            for (int i = 0; i < vecsize; i++)
+            {
                 stockItem item_t;
-                if (item_t.load(fs) != success)return file_corrupted;
-                data[cate_id].push_back(item_t);
+                if (item_t.load(fs) != success)
+                    return file_corrupted;
+                itemdata[cate_id].push_back(item_t);
             }
-            fs >> temp; if (temp != end("item_data_inner", false))return file_corrupted;
+            fs >> temp;
+            if (temp != End("item_data_inner", true))
+                return file_corrupted;
         }
-        fs >> temp; if (temp != end("item_data_outer",false))return file_corrupted;
+        fs >> temp;
+        if (temp != End("item_data_outer", true))
+            return file_corrupted;
     }
-    fs >> temp; if (temp != end("stockman_data",false))return file_corrupted;
+    fs >> temp;
+    if (temp != Begin("users", true))
+        return file_corrupted;
+    int szusr;
+    fs >> szusr;
+    for (int i = 0; i < szusr; i++) {
+        userInfo usr;
+        if (usr.load(fs) != success)return file_corrupted;
+        userdata.push_back(usr);
+    }
+    fs >> temp;
+    if (temp != End("users", true))return file_corrupted;
+    fs >> temp;
+    if (temp != End("stockman_data", true))
+        return file_corrupted;
     return success;
 }
 
-result stockMan::saveDataAs(fstream &fs)
+result stockMan::saveDataAs(ofstream& fs)
 {
-    if (!fs.is_open())return file_corrupted;
-    fs << begin("stockman_data");
+    if (!fs.is_open())
+        return file_corrupted;
+    fs << Begin("stockman_data");
     {
-        fs << begin("category_definition");
+        fs << Begin("category_definition");
         fs << categories.size() << " ";
-        for (int i = 0; i < categories.size(); i++) {
+        for (int i = 0; i < categories.size(); i++)
+        {
             categories[i].write(fs);
         }
-        fs << end("category_definition");
-        fs << begin("attr_definition");
+        fs << End("category_definition");
+        fs << Begin("attr_definition");
         fs << attributes.size() << " ";
-        for (int i = 0; i < attributes.size(); i++) {
+        for (int i = 0; i < attributes.size(); i++)
+        {
             attributes[i].write(fs);
         }
-        fs << end("attr_definition");
-        fs << begin("item_data_outer");
-        fs << data.size();
-        for (auto i = data.begin(); i != data.end(); i++) {
-            fs << begin("item_data_innner");
+        fs << End("attr_definition");
+        fs << Begin("item_data_outer");
+        fs << itemdata.size();
+        for (auto i = itemdata.begin(); i != itemdata.end(); i++)
+        {
+            fs << Begin("item_data_inner");
             fs << (*i).first << " ";
             auto vec = (*i).second;
             fs << vec.size() << " ";
-            for (int k = 0; k < vec.size(); k++) {
+            for (int k = 0; k < vec.size(); k++)
+            {
                 vec[k].write(fs);
             }
-            fs << end("item_data_innner");
+            fs << End("item_data_inner");
         }
-        fs << end("item_data_outer");
+        fs << End("item_data_outer");
     }
-    fs << end("stockman_data");
+    fs << Begin("users");
+    {
+        int sz = userdata.size();
+        fs << sz << " ";
+        for (int i = 0; i < sz; i++)
+        {
+            userdata[i].write(fs);
+        }
+    }
+    fs << End("users");
+    fs << End("stockman_data");
     return success;
 }
 
 loginToken stockMan::login(string username, string password)
 {
-    return loginToken();
+    loginToken token;
+    auto x = userdata.begin();
+    for (; x != userdata.end(); x++)
+    {
+        if ((*x).username == username)
+            break;
+    }
+    if (x == userdata.end() || (*x).password != password)
+    {
+        token.valid = false;
+        logger.setLoginToken(token, username);
+        logger.log("login failed");
+        return token;
+    }
+    token.userid = (*x).userid;
+    token.login_time = time(NULL);
+    token.usertype = (*x).privilege;
+    token.valid = true;
+    current_login_token = token;
+    logger.setLoginToken(token, username);
+    logger.log("login success");
+    return current_login_token;
 }
 
 loginToken stockMan::getCurrentToken(void)
 {
-    return loginToken();
+    return current_login_token;
 }
 
 result stockMan::regist(string username, string password, userType usrType)
 {
-    return result();
+    auto x = userdata.begin();
+    userInfo res;
+    for (; x != userdata.end(); x++)
+    {
+        if ((*x).username == username)
+        {
+            return item_already_exist;
+        }
+    }
+    res.userid = newuid();
+    res.username = username;
+    res.password = password;
+    res.privilege = usrType;
+    userdata.push_back(res);
+    logger.log("user " + username + " successfully registered.");
+    return success;
 }
-
 
 vector<stockCategory> stockMan::getCategories(void)
 {
-    // TODO: insert return statement here
-    return vector<stockCategory>();
+    return categories;
 }
 
 vector<stockAttr> stockMan::getAttrs(void)
 {
-    return vector<stockAttr>();
-    // TODO: insert return statement here
+    return attributes;
 }
 
 vector<userInfo> stockMan::getUsers(void)
 {
-    return vector<userInfo>();
+    //if (current_login_token.usertype != admin)return vector<userInfo>();
+    return userdata;
 }
 
 stockAttr stockMan::getAttr(string name)
 {
+    auto x = attributes.begin();
+    while (x != attributes.end())
+    {
+        if ((*x).name == name)
+            return *x;
+        x++;
+    }
     return stockAttr();
 }
 
 stockAttr stockMan::getAttr(uid id)
 {
+    auto x = attributes.begin();
+    while (x != attributes.end())
+    {
+        if ((*x).id == id)
+            return *x;
+        x++;
+    }
     return stockAttr();
 }
 
-
 stockCategory stockMan::getCategory(string name)
 {
+    auto x = categories.begin();
+    while (x != categories.end())
+    {
+        if ((*x).name == name)
+            return *x;
+        x++;
+    }
     return stockCategory();
 }
 
 stockCategory stockMan::getCategory(uid id)
 {
+    auto x = categories.begin();
+    while (x != categories.end())
+    {
+        if ((*x).id == id)
+            return *x;
+        x++;
+    }
     return stockCategory();
 }
 
 stockItem stockMan::getItem(uid id)
 {
+    auto x = itemdata.begin();
+    while (x != itemdata.end())
+    {
+        auto y = (*x).second.begin();
+        while (y != (*x).second.end())
+        {
+            if ((*y).id == id)
+                return *y;
+            y++;
+        }
+        x++;
+    }
     return stockItem();
 }
 
 stockItem stockMan::getItem(string name)
 {
+    auto x = itemdata.begin();
+    while (x != itemdata.end())
+    {
+        auto y = (*x).second.begin();
+        while (y != (*x).second.end())
+        {
+            if ((*y).name == name)
+                return *y;
+            y++;
+        }
+        x++;
+    }
     return stockItem();
 }
 
 userInfo stockMan::getUserInfo(uid id)
 {
-    return userInfo();
+    userInfo info;
+    userInfo res;
+    auto x = userdata.begin();
+    while (x != userdata.end())
+    {
+        if ((*x).userid == id)
+            info = *x;
+        x++;
+    }
+    res.userid = info.userid;
+    res.description = info.description;
+    res.username = info.username;
+    return res;
 }
 
 result stockMan::findUser(uid id)
 {
-    return result();
+    auto x = userdata.begin();
+    while (x != userdata.end())
+    {
+        if ((*x).userid == id)
+            return success;
+        x++;
+    }
+    return item_not_found;
 }
 
 result stockMan::findUser(string name)
 {
-    return result();
+    auto x = userdata.begin();
+    while (x != userdata.end())
+    {
+        if ((*x).username == name)
+            return success;
+        x++;
+    }
+    return item_not_found;
 }
 
-result stockMan::addCategory(stockCategory type, string comment)
+result stockMan::addCategory(stockCategory nm, string comment)
 {
-    return result();
+    string name = nm.name;
+    auto x = categories.begin();
+    while (x != categories.end())
+    {
+        if ((*x).name == nm.name)
+            return item_already_exist;
+        x++;
+    }
+    nm.id = newuid();
+    categories.push_back(nm);
+    logger.log("added category:" + nm.name);
+    return success;
 }
 
-result stockMan::addAttr(stockAttr attr, string comment)
+result stockMan::addAttr(stockAttr nm, string comment)
 {
-    return result();
+    string name = nm.name;
+    auto x = attributes.begin();
+    while (x != attributes.end())
+    {
+        if ((*x).name == nm.name)
+            return item_already_exist;
+        x++;
+    }
+    nm.id = newuid();
+    attributes.push_back(nm);
+    logger.log("added attribute:" + nm.name);
+    return success;
 }
 
 result stockMan::addItem(stockItem item, string comment)
 {
-    return result();
-}
+    uid id = item.category;
+    stockCategory cate = getCategory(item.category);
+    auto x = item.attrs.begin();
+    while (x != item.attrs.end())
+    {
+        if (getAttr(*x) == stockAttr())
+            return item_not_found;
+        x++;
+    }
+    if (cate == stockCategory())
+        return item_not_found;
+    if (!(getItem(item.name) == stockItem()))
+        return item_already_exist;
 
+    item.id = newuid();
+    itemdata[item.category].push_back(item);
+    logger.log("add item:" + item.name);
+    return success;
+}
 
 result stockMan::editCategory(uid id, string name, string desc)
 {
-    return result();
+    if (getCategory(id) == stockCategory())
+        return item_not_found;
+    auto x = categories.begin();
+    while (x != categories.end())
+    {
+        if ((*x).id == id)
+            break;
+        x++;
+    }
+    x->desc = desc;
+    x->name = name;
+    logger.log("edited item:" + x->name);
+    return success;
 }
 
-result stockMan::editItem(uid id, string name, string desc, string comment)
+result stockMan::editItem(uid id, string name, string desc, uid cate, string comment)
 {
-    return result();
+    if (getItem(id) == stockItem())
+        return item_not_found;
+    auto x = itemdata.begin();
+    vector<stockItem>::iterator y;
+    while (x != itemdata.end())
+    {
+        y = (*x).second.begin();
+        while (y != (*x).second.end())
+        {
+            if ((*y).id == id)
+                goto finish;
+            y++;
+        }
+        x++;
+    }
+finish:
+    if (y->category == cate)
+    {
+        y->name = name;
+        y->desc = desc;
+        logger.log("edited item:" + y->name + "comment :" + comment);
+        return success;
+    }
+    else
+    {
+        y->name = name;
+        y->desc = desc;
+        y->category = cate;
+        logger.log("edited item:" + y->name + "comment :" + comment);
+        x->second.push_back(*y);
+        x->second.erase(y);
+        return success;
+    }
 }
 
 result stockMan::editUser(uid id, string name, string password, userType type, string comment)
@@ -411,46 +701,324 @@ result stockMan::editUser(uid id, string name, string password, userType type, s
     return result();
 }
 
-
-
 result stockMan::removeCategory(uid id, string comment)
 {
-    return result();
+    if (getCategory(id) == stockCategory())
+        return item_not_found;
+    auto item = categories.begin();
+    while (item != categories.end())
+    {
+        if ((*item).id == id)
+            break;
+        item++;
+    }
+    logger.log("erased category:" + item->name);
+    auto x = itemdata.begin();
+    while (x != itemdata.end())
+    {
+        if (x->first == id)
+            break;
+        x++;
+    }
+    if (x != itemdata.end())
+        itemdata.erase(x);
+    categories.erase(item);
+    return success;
 }
 
 result stockMan::removeAttr(uid id, string comment)
 {
-    return result();
+    if (getAttr(id) == stockAttr())
+        return item_not_found;
+    auto item = attributes.begin();
+    while (item != attributes.end())
+    {
+        if ((*item).id == id)
+            break;
+        item++;
+    }
+    logger.log("removed attribute:" + item->name + "\tcomment:" + comment);
+    auto x = itemdata.begin();
+    while (x != itemdata.end())
+    {
+        auto y = x->second.begin();
+        while (y != x->second.end())
+        {
+            auto z = find(y->attrs.begin(), y->attrs.end(), id);
+            if (z != y->attrs.end())
+                y->attrs.erase(z);
+            y++;
+        }
+        x++;
+    }
+    attributes.erase(item);
+    return success;
 }
 
 result stockMan::removeItem(uid id, string comment)
 {
-    return result();
+    if (getItem(id) == stockItem())
+        return item_not_found;
+    auto x = itemdata.begin();
+    while (x != itemdata.end())
+    {
+        auto y = x->second.begin();
+        while (y != x->second.end())
+        {
+            if (y->id == id)
+            {
+                logger.log("removed item:" + y->name + "\tcomment:" + comment);
+                x->second.erase(y);
+                return success;
+            }
+            y++;
+        }
+        x++;
+    }
 }
 
 result stockMan::removeUser(uid id)
 {
-    return result();
+    if (getUserInfo(id) == userInfo())
+        return item_not_found;
+    auto x = userdata.begin();
+    while (x != userdata.end())
+    {
+        if (x->userid == id)
+        {
+            logger.log("user removed:" + x->username);
+            userdata.erase(x);
+            return success;
+        }
+        x++;
+    }
+    return unknown_error;
 }
 
-
-
-result stockMan::InStock(uid id, int count, int durance, string comment)
+result stockMan::InStock(uid id, int count, string comment)
 {
-    return result();
+    if (getItem(id) == stockItem())
+        return item_not_found;
+    auto x = itemdata.begin();
+    while (x != itemdata.end())
+    {
+        auto y = x->second.begin();
+        while (y != x->second.end())
+        {
+            if (y->id == id)
+            {
+                y->count += count;
+                if (y->count < 0)
+                    y->count = 0;
+                y->detail.push_back({ time(NULL), count });
+                logger.log("Instock :" + y->name + "count: " + to_string(count));
+                return success;
+            }
+            y++;
+        }
+        x++;
+    }
+    return unknown_error;
 }
 
-vector<tuple<infoType, stockCategory, stockItem, int, int>> stockMan::overview(void)
+vector<tuple<infoType, string, string, float, float>> stockMan::overview(void)
 {
-    return vector<tuple<infoType, stockCategory, stockItem, int, int>>();
+    vector<tuple<infoType, string, string, float, float>> res;
+    auto x = itemdata.begin();
+    while (x != itemdata.end())
+    {
+        auto y = x->second.begin();
+        while (y != x->second.end())
+        {
+            if (y->count >= y->max_count)
+            {
+                res.push_back({ full, getCategory(y->category).name, y->name, y->count, y->max_count });
+            }
+            if (y->count < y->min_count)
+            {
+                res.push_back({ notenough, getCategory(y->category).name, y->name, y->count, y->min_count });
+            }
+            y++;
+        }
+        x++;
+    }
+    sort(res.begin(), res.end(), [](tuple<infoType, string, string, float, float> a, tuple<infoType, string, string, float, float> b) {
+        if (get<0>(a) == get<0>(b))
+        {
+            if (get<1>(a) == get<1>(b))
+            {
+                return get<2>(a) > get<2>(b);
+            }
+            else
+            {
+                return get<1>(a) >= get<1>(b);
+            }
+        }
+        else
+        {
+            return get<0>(a) >= get<0>(b);
+        }
+        });
+    return res;
+}
+
+tuple<map<int, float>, map<int, float>> stockMan::getstat(statrange range, tuple<int, int, int> lim)
+{
+    tuple<map<int, float>, map<int, float>> res;
+    static map<statrange, int> cntmap = { {week, 7}, {month, 30}, {year, 12} };
+    for (int i = 0; i < cntmap[range]; i++)
+    {
+        get<0>(res)[i] = 0;
+        get<1>(res)[i] = 0;
+    }
+    auto x = itemdata.begin();
+    while (x != itemdata.end())
+    {
+        auto y = x->second.begin();
+        while (y != x->second.end())
+        {
+            float pc = y->price;
+            auto z = y->detail.begin();
+            while (z != y->detail.end())
+            {
+                tm* date = localtime(&get<0>(*z));
+                int count = get<1>(*z);
+                switch (range)
+                {
+                case week:
+                    if (date->tm_year == get<0>(lim) && date->tm_mon == get<1>(lim)
+                        && date->tm_mday / 4 == get<2>(lim)) {
+                        get<0>(res)[date->tm_wday] += count;
+                        get<1>(res)[date->tm_wday] += pc;
+                    }
+                    break;
+                case month:
+                    if (date->tm_year == get<0>(lim) && date->tm_mon == get<1>(lim)) {
+                        get<0>(res)[date->tm_mday] += count;
+                        get<1>(res)[date->tm_mday] += pc;
+                    }
+                    break;
+                case year:
+                    if (date->tm_year == get<0>(lim)) {
+                        get<0>(res)[date->tm_mon] += count;
+                        get<1>(res)[date->tm_mon] += pc;
+                    }
+                    break;
+                default:
+                    break;
+                }
+                z++;
+            }
+            y++;
+        }
+        x++;
+    }
+    return res;
 }
 
 vector<stockItem> stockMan::getItems(uid category, set<uid> attrs)
 {
-    return vector<stockItem>();
+    vector<stockItem> res;
+    auto x = itemdata.begin();
+    while (x != itemdata.end())
+    {
+        auto y = x->second.begin();
+        if (x->first == category)
+            while (y != x->second.end())
+            {
+                if (attrs.size() == 0 || ([&y, &attrs]() {
+                    auto z = attrs.begin();
+                    while (z != attrs.end())
+                    {
+                        if (find(y->attrs.begin(), y->attrs.end(), *z) != y->attrs.end())
+                            return true;
+                        z++;
+                    }
+                    return false;
+                    }()))
+                {
+                    stockItem current;
+                    current.name = y->name;
+                    current.desc = y->desc;
+                    current.count = y->count;
+                    current.durance = y->durance;
+                    current.max_count = y->max_count;
+                    current.min_count = y->min_count;
+                    current.price = y->price;
+                    current.id = y->id;
+                    res.push_back(current);
+                }
+                    y++;
+            }
+        x++;
+    }
+    sort(res.begin(), res.end(), [](stockItem& a, stockItem& b) {
+        return a.name > b.name;
+        });
+    return res;
 }
 
-result stockMan::log(time_t time, uid userid, operationType opType, operationTarget opTarget, int value)
+result logMan::setLogfile(string filename)
 {
-    return result();
+    file.open(filename);
+    if (file.is_open())
+        return success;
+    return unknown_error;
+}
+
+result logMan::log(string text)
+{
+    if (!file.is_open())
+        return unknown_error;
+    file << "time:\t" << time(NULL) << "\t"
+        << "userid:\t" << token.userid << "\t"
+        << "action:\t" << text << endl;
+    return success;
+}
+map<string, float> stockMan::getstatCate(statrange range, tuple<int, int, int> lim,bool iscurrency) {
+    map<string, float> res;
+    auto x = itemdata.begin();
+    while (x != itemdata.end())
+    {
+        auto y = x->second.begin();
+        while (y != x->second.end())
+        {
+            float pc = y->price;
+            auto z = y->detail.begin();
+            while (z != y->detail.end())
+            {
+                tm* date = localtime(&get<0>(*z));
+                int count = get<1>(*z);
+                switch (range)
+                {
+                case week:
+                    if (date->tm_year == get<0>(lim) && date->tm_mon == get<1>(lim)
+                        && date->tm_mday / 4 == get<2>(lim)) {
+                        float dat = iscurrency ? get<1>(*z) * pc : get<1>(*z);
+                        res[getCategory(x->first).name] += dat;
+                    }
+                    break;
+                case month:
+                    if (date->tm_year == get<0>(lim) && date->tm_mon == get<1>(lim)
+                        ) {
+                        float dat = iscurrency ? get<1>(*z) * pc : get<1>(*z);
+                        res[getCategory(x->first).name] += dat;
+                    }
+                    break;
+                case year:
+                    if (date->tm_year == get<0>(lim)) {
+                        float dat = iscurrency ? get<1>(*z) * pc : get<1>(*z);
+                        res[getCategory(x->first).name] += dat;
+                    }
+                    break;
+                default:
+                    break;
+                }
+                z++;
+            }
+            y++;
+        }
+        x++;
+    }
+    return res;
 }

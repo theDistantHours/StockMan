@@ -1,15 +1,7 @@
 #include "uid.h"
+#include "commons.h"
 
 uid newuid(void)
 {
-    return uid();
-}
-
-uid removeuid(uid id)
-{
-    return uid();
-}
-
-void adduid(uid id)
-{
+    return (uid)time(NULL);
 }

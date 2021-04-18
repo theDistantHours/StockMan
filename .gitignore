@@ -9,3 +9,7 @@
 *.obj
 *.pdb
 Debug/*
+*.tlog
+*.obj
+*.tlog
+*.obj

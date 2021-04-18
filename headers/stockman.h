@@ -17,6 +17,7 @@ enum operationType {
 enum operationTarget {
     stock, category, attr, users
 };
+enum statrange { week, month, year };
 
 struct record;
 struct userInfo;
@@ -38,62 +39,82 @@ struct record :public data {
     uid userid;
     uid parameter;
 
-    result write(fstream&) override;
-    result load(fstream&) override;
+    result write(ofstream&) override;
+    result load(ifstream&) override;
 };
 
 struct userInfo :public data {
-    uid userid;
-    string username;
-    string password;
-    string description;
-    time_t regdate;
+    uid userid = -1;
+    string username = "";
+    string password = "";
+    string description = "";
+    time_t regdate = 0;
 
-    userType privilege;
+    userType privilege = guest;
 
-    result write(fstream&) override;
-    result load(fstream&) override;
+    result write(ofstream&) override;
+    result load(ifstream&) override;
+
+    static userInfo empty;
+    bool operator==(userInfo& b) {
+        if (b.userid == userid && b.username == username && b.password == password && b.description == description && b.regdate == regdate)return true;
+        return false;
+    }
 };
 
 struct stockAttr :public data {
-    uid id;
-    string name;
-    string desc;
+    uid id = -1;
+    string name = "";
+    string desc = "";
 
-    result write(fstream&) override;
-    result load(fstream&) override;
+    result write(ofstream&) override;
+    result load(ifstream&) override;
+
+    bool operator==(stockAttr& b) {
+        if (b.id == id && b.name == name && b.desc == desc)return true;
+        return false;
+    }
 };
 
 struct stockCategory :public data {
-    uid id;
-    string name;
-    string desc;
+    uid id = -1;
+    string name = "";
+    string desc = "";
 
-    result write(fstream&) override;
-    result load(fstream&) override;
+    result write(ofstream&) override;
+    result load(ifstream&) override;
+
+    bool operator==(stockCategory& b) {
+        if (b.id == id && b.name == name && b.desc == desc)return true;
+        return false;
+    }
 };
 
 struct stockItem :public data {
-    uid id;
-    int price;
-    int durance;
+    uid id = -1;
+    float price = 0;
+    int durance = 0;
 
-    int min_count;
-    int max_count;
+    int min_count = 0;
+    int max_count = 0;
 
-    int count;
-
-    stockCategory category;
+    int count = 0;
+    uid category = -1;
     
-    string name;
-    string desc;
+    string name = "";
+    string desc = "";
 
     vector<uid> attrs;
     vector<tuple<time_t, int>> detail;
 
-    result write(fstream&) override;
-    result load(fstream&) override;
+    result write(ofstream&) override;
+    result load(ifstream&) override;
 
+    bool operator==(stockItem& b) {
+        if (b.id == id && b.name == name && b.desc == desc && b.price == price && b.durance == durance && b.min_count == min_count &&
+            b.max_count == max_count && b.category == category && b.attrs == attrs && b.detail == detail)return true;
+        return false;
+    }
 };
 
 struct loginToken  {
@@ -104,13 +125,27 @@ struct loginToken  {
     userType usertype;
 
 };
-
+class logMan {
+public:
+    result setLogfile(string filename);
+    result setLoginToken(loginToken token_p, string username_p) {
+        token = token_p;
+        username = username_p;
+        return success;
+    }
+    result log(string text);
+private:
+    
+    loginToken token;
+    string username;
+    fstream file;
+};
 
 class stockMan {
 public:
-    result loadDatafromFile(fstream& fs);
+    result loadDatafromFile(ifstream& fs);
     result saveData();
-    result saveDataAs(fstream& filename);
+    result saveDataAs(ofstream& filename);
 
     loginToken login(string username, string password);
     loginToken getCurrentToken(void);
@@ -137,7 +172,7 @@ public:
     result addItem(stockItem item, string comment = "No comment");
 
     result editCategory(uid id, string name, string desc);
-    result editItem(uid id, string name, string desc,string comment = "No comment");
+    result editItem(uid id, string name, string desc,uid cate,string comment = "No comment");
     result editUser(uid id, string name, string password, userType type, string comment = "No comment");
 
     result removeCategory(uid id, string comment = "No comment");
@@ -145,24 +180,35 @@ public:
     result removeItem(uid id, string comment = "No comment");
     result removeUser(uid id);
 
-    result InStock(uid id, int count, int durance, string comment = "No comment");
-    vector<tuple<infoType, stockCategory, stockItem, int, int>> overview(void);
+    result InStock(uid id, int count, string comment = "No comment");
+    vector<tuple<infoType, string, string, float, float>> overview(void);
+    tuple<map<int, float>, map<int, float>> getstat(statrange range, tuple<int, int, int> lim);
+    map<string, float> getstatCate(statrange range, tuple<int,int,int> lim, bool iscurrency);
 
     stockMan() {
-        
+        datfile_in.open("stock_data.dat",ios::in);
+        loadDatafromFile(datfile_in);
+        datfile_in.close();
+        logfile.open("log_data.dat");
     }
     stockMan(string filename) {
-
+        datfile_in.open(filename);
+        loadDatafromFile(datfile_in);
+        datfile_in.close();
+        logfile.open("log_data.dat");
     }
 
 private:
     loginToken current_login_token;
-    fstream logfile;
-    fstream datfile;
-    map<uid, vector<stockItem>> data;
+    ofstream logfile;
+    ofstream datfile;
+    ifstream datfile_in;
+    map<uid, vector<stockItem>> itemdata;
     vector<stockCategory> categories;
     vector<stockAttr> attributes;
+    vector<userInfo> userdata;
 
+    logMan logger;
     result log(time_t time, uid userid, operationType opType, operationTarget opTarget, int value);
 
 };

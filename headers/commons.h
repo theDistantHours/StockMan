@@ -5,7 +5,7 @@
 #include<ctime>
 #include<map>
 #include<set>
-
+#include<algorithm>
 
 
 enum result {
@@ -24,10 +24,10 @@ time_t randomtime(time_t start, time_t end);
 time_t getTime(bool isEmulated);
 
 class data {
-    virtual result load(std::fstream &file) {
+    virtual result load(std::ifstream &file) {
         return success;
     }
-    virtual result write(std::fstream &file) {
+    virtual result write(std::ofstream &file) {
         return success;
     }
 };
