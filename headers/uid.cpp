@@ -3,5 +3,15 @@
 
 uid newuid(void)
 {
-    return (uid)time(NULL);
+    static uid last;
+    uid res = time(NULL) * 1000 + clock() % 1000;
+    if (res == last) {
+        res++;
+        last = res;
+        return res;
+    }
+    else {
+        last = res;
+        return res;
+    }
 }

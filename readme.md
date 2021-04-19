@@ -1,6 +1,6 @@
 # 工程概论大作业-电子元器件仓库管理系统
 
-### 作者 20200140班 林嘉颖，龚子健
+### 作者	 20200140班 林嘉颖，龚子健
 
 ## 设计思路
 
@@ -105,9 +105,16 @@
 
 打开StockMan_Solution.sln **(VS 2019  required)**，任选一个配置，直接build即可。
 
-如果找不到头文件，进入项目设置-> VC++ Directories,添加目录
+如果生成失败，请检查以下配置：
 
-+ .\imgui
-+ .\headers
-
-即可。
++ 是否在 项目设置->VC++目录->包含目录中添加了：
+  + .\imgui
+  + .\headers
++ 是否在 项目设置->链接器->额外目录中添加了：
+  + $(DXSDK_DIR)/Lib/x86
+  + 或$(DXSDK_DIR)/Lib/x64
++ 是否在 项目设置->链接器->额外依赖项中添加了：
+  + d3d11.lib
+  + d3dcompiler.lib
+  + dxgi.lib
++ 若都已经添加成功，依然生成失败，请确认自己是否安装了directx11 SDK。可从[此处](https://www.microsoft.com/en-us/download/details.aspx?id=6812)下载安装包，或者在visual studio installer 中添加。
