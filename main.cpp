@@ -315,6 +315,7 @@ int main(int, char**)
                     {
                         clearContent();
                         showLogwindow = true;
+                        refresh_required = true;
                     }
                     else
                     {
@@ -1393,11 +1394,16 @@ result validateLogin(loginToken token, userType type)
 
 void ShowLogWindow(bool opt)
 {
+    static vector<string> logs;
     if (opt)
     {
+        if (refresh_required) {
+            logs = StockMan.getlogs();
+        }
         BeginChild("Recent logs", vec_content, true, wndflg_content);
-        //have a look how to create charts
-        Text("This part is currently unavaliable.\nFurther updates may support log displaying feature.");
+        for (auto it = logs.begin(); it != logs.end(); it++) {
+            Text(it->c_str());
+        }
         EndChild();
     }
 }
@@ -1584,6 +1590,7 @@ void ShowStat(bool opt, statrange range)
         static ImVec2 vec_mainshow = ImVec2(598, 704);
         static ImVec2 vec_graph = ImVec2(580, 323);
         static ImVec2 vec_graph_content = ImVec2(570, 280);
+        static ImGuiIO& io = ImGui::GetIO();
 
         static map<string, float> count_data_c;
         static vector<stockCategory> cates;
@@ -1672,16 +1679,32 @@ void ShowStat(bool opt, statrange range)
                 ImDrawList* drawlist = GetWindowDrawList();
                 for (auto i = count_data_c.begin(); i != count_data_c.end(); i++)
                 {
-                    BeginGroup();
+                    
                     ImVec2 v1 = GetCursorScreenPos();
+                    BeginGroup();
                     drawlist->PushClipRect(v1, ImVec2(v1.x + 100, v1.y + fontHeight + 5));
                     Text((*i).first.c_str());
+                    EndGroup();
+                    if (IsItemHovered()) {
+                        ImGui::SetTooltip((*i).first.c_str());
+                    }
                     drawlist->PopClipRect();
                     SameLine();
+                    BeginGroup();
                     ImVec2 v2 = GetCursorScreenPos();
                     v2.x = v1.x + 105;
-                    drawlist->AddRectFilled(ImVec2(v2.x, v2.y + 2), ImVec2(v2.x + (*i).second * 150.0 / cnt_max_c, v2.y + fontHeight - 2), is_currency ? currency_color : count_color);
+                    ImVec2 recbegin = ImVec2(v2.x + 90, v2.y);
+                    ImVec2 recend = ImVec2(v2.x + 90 + (*i).second * 88.0 / cnt_max_c, v2.y + fontHeight - 2);
+                    drawlist->AddRectFilled(recbegin, recend, is_currency ? currency_color : count_color);
                     EndGroup();
+                    if ([&v2]() {
+                        auto x = io.MousePos.x;
+                        auto y = io.MousePos.y;
+                        if(x>= v2.x && x<=v2.x + 180 && y >= v2.y && y <= (v2.y + fontHeight-2))return true;
+                            return false;
+                        }()) {
+                        ImGui::SetTooltip("%.1f", (*i).second);
+                    }
                 }
             }
             EndChild();

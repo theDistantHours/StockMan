@@ -262,6 +262,7 @@ result stockMan::saveData()
     datfile << End("users");
     datfile << End("stockman_data");
     datfile.close();
+    logger.log("Data saved.");
     return result::success;
 }
 
@@ -422,7 +423,7 @@ loginToken stockMan::login(string username, string password)
     token.valid = true;
     current_login_token = token;
     logger.setLoginToken(token, username);
-    logger.log("login result::success");
+    logger.log("successfully logged in.");
     return current_login_token;
 }
 
@@ -466,6 +467,14 @@ vector<userInfo> stockMan::getUsers(void)
     //if (current_login_token.usertype != admin)return vector<userInfo>();
     return userdata;
 }
+
+vector<string> stockMan::getlogs(void)
+{
+    if(current_login_token.usertype != userType::admin)return vector<string>();
+    
+    return logger.getlogs();
+}
+
 
 stockAttr stockMan::getAttr(string name)
 {
@@ -963,7 +972,7 @@ vector<stockItem> stockMan::getItems(uid category, set<uid> attrs)
 
 result logMan::setLogfile(string filename)
 {
-    file.open(filename);
+    file.open(filename,ios::app);
     if (file.is_open())
         return result::success;
     return result::unknown_error;
@@ -974,9 +983,25 @@ result logMan::log(string text)
     if (!file.is_open())
         return result::unknown_error;
     file << "time:\t" << time(NULL) << "\t"
-        << "userid:\t" << token.userid << "\t"
+        << "userid:\t" << username << "\t"
         << "action:\t" << text << endl;
     return result::success;
+}
+vector<string> logMan::getlogs(void) {
+    ifstream ifs;
+    vector<string> res;
+    file.close();
+    file.clear();
+    ifs.open("log_data.dat",ios::in);
+    string cl;
+    while (!ifs.eof()) {
+        getline(ifs, cl);
+        res.push_back(cl);
+    }
+    ifs.close();
+    ifs.clear();
+    file.open("log_data.dat",ios::app);
+    return res;
 }
 map<string, float> stockMan::getstatCate(statrange range, tuple<int, int, int> lim,bool iscurrency) {
     map<string, float> res;

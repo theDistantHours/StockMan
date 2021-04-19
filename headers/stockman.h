@@ -134,6 +134,7 @@ public:
         return result::success;
     }
     result log(string text);
+    vector<string> getlogs(void);
     logMan() {
         token = loginToken();
         username = "";
@@ -162,6 +163,7 @@ public:
     vector<stockAttr> getAttrs(void);
     vector<stockItem> getItems(uid category, set<uid> attrs);
     vector<userInfo> getUsers(void);
+    vector<string> getlogs(void);
 
     stockAttr getAttr(string name);
     stockAttr getAttr(uid id);
@@ -196,18 +198,17 @@ public:
         datfile_in.open("stock_data.dat",ios::in);
         loadDatafromFile(datfile_in);
         datfile_in.close();
-        logfile.open("log_data.dat");
+        logger.setLogfile("log_data.dat");
     }
     stockMan(string filename) {
         datfile_in.open(filename);
         loadDatafromFile(datfile_in);
         datfile_in.close();
-        logfile.open("log_data.dat");
+        logger.setLogfile("log_data.dat");
     }
 
 private:
     loginToken current_login_token;
-    ofstream logfile;
     ofstream datfile;
     ifstream datfile_in;
     map<uid, vector<stockItem>> itemdata;
@@ -216,7 +217,6 @@ private:
     vector<userInfo> userdata;
 
     logMan logger;
-    result log(time_t time, uid userid, operationType opType, operationTarget opTarget, int value);
 
 };
 
