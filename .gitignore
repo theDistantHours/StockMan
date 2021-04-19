@@ -13,3 +13,9 @@ Debug/*
 *.obj
 *.tlog
 *.obj
+Publishments/*
+*.ipdb
+*.iobj
+*.recipe
+*.log
+*.log
