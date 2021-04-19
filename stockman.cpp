@@ -820,8 +820,10 @@ result stockMan::InStock(uid id, int count, string comment)
             if (y->id == id)
             {
                 y->count += count;
-                if (y->count < 0)
+                if (y->count < 0) {
+                    count = y->count - count;
                     y->count = 0;
+                }
                 y->detail.push_back({ time(NULL), count });
                 logger.log("Instock :" + y->name + "count: " + to_string(count));
                 return result::success;
