@@ -1,4 +1,3 @@
-// Dear ImGui: standalone example application for DirectX 11
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -12,19 +11,23 @@
 
 using namespace ImGui;
 
-enum fontStyle
+//老师
+//这项目一共3000行
+//您差不多得了
+
+enum class fontStyle
 {
     default,
     normal,
     literal
 };
-enum fontSize
+enum class fontSize
 {
     text,
     caption,
     header
 };
-enum fontWeight
+enum class fontWeight
 {
     regular,
     medium,
@@ -67,21 +70,21 @@ bool ButtonCenter(string str)
 void ShowLogWindow(bool opt);
 
 void ShowEditUser(bool opt);
-void ShowStat(bool opt, statrange range = year);
+void ShowStat(bool opt, statrange range = statrange::year);
 void ShowStockManage(bool opt);
 void ShowOverView(bool opt);
 
 result validateLogin(loginToken token, userType type);
 
 //Modal helper functions
-void showLoginNeeded(bool isopen = false, userType requiredType = guest);
+void showLoginNeeded(bool isopen = false, userType requiredType = userType::guest);
 void showAbout(bool isopen = false);
 void ShowInStockWindow(bool opt = false);
 void ShowItemDetail(uid dest = 0, bool isopen = 0);
 void showUserInfo(uid id = 0, bool isopen = false);
 
 void showAddCategory(bool isopen = false);
-void showAddItem(bool isopen = false,uid current_cate = 0, vector<uid> attrs = vector<uid>());
+void showAddItem(bool isopen = false, uid current_cate = 0, vector<uid> attrs = vector<uid>());
 void showAddAttr(bool isopen = false);
 void showAddUser(bool isopen = false);
 
@@ -99,6 +102,11 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 stockMan StockMan;
 static ImVec2 vec_content = ImVec2(920, 720);
+static ImVec2 rect_remove = ImVec2(800, 200);
+static ImVec2 pos_remove = ImVec2(240, 300);
+static ImVec2 rect_instock = ImVec2(600, 200);
+static ImVec2 pos_instock = ImVec2(340, 250);
+
 static ImGuiWindowFlags wndflg_content = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse;
 static bool isloggedin = false;
 static bool showloginwindow = true;
@@ -123,7 +131,6 @@ void clearContent(void)
     showStat = false;
     showLogwindow = false;
     showStockManage = false;
-
     showOverview = false;
 }
 static loginToken currentLoginToken;
@@ -134,10 +141,6 @@ int main(int, char**)
     // Initialize window and graphics
     if (!InitGraphics())
         return 1;
-
-    // window states
-
-    bool logged_in = false;
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -177,7 +180,7 @@ int main(int, char**)
         currentLoginToken.valid = true;
 
         PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
-        PushFont(fontmap[normal][text][regular]);
+        PushFont(fontmap[fontStyle::normal][fontSize::text][fontWeight::regular]);
 
         if (BeginMainMenuBar())
         {
@@ -192,21 +195,21 @@ int main(int, char**)
             {
                 if (MenuItem("In Stock"))
                 {
-                    if (validateLogin(currentLoginToken, worker) == success)
+                    if (validateLogin(currentLoginToken, userType::worker) == result::success)
                     {
                         ShowInStockWindow(true);
                     }
                     else
-                        showLoginNeeded(true, worker);
+                        showLoginNeeded(true, userType::worker);
                 }
                 if (MenuItem("Out Stock"))
                 {
-                    if (validateLogin(currentLoginToken, worker) == success)
+                    if (validateLogin(currentLoginToken, userType::worker) == result::success)
                     {
                         ShowInStockWindow(true);
                     }
                     else
-                        showLoginNeeded(true, worker);
+                        showLoginNeeded(true, userType::worker);
                 }
                 ImGui::EndMenu();
             }
@@ -214,50 +217,50 @@ int main(int, char**)
             {
                 if (ImGui::MenuItem("Add/Remove Category"))
                 {
-                    if (validateLogin(currentLoginToken, worker) == success)
+                    if (validateLogin(currentLoginToken, userType::worker) == result::success)
                     {
                         clearContent();
                         showStockManage = true;
                     }
                     else
                     {
-                        showLoginNeeded(true, worker);
+                        showLoginNeeded(true, userType::worker);
                     }
                 }
                 if (ImGui::MenuItem("Add/Remove Attribute"))
                 {
-                    if (validateLogin(currentLoginToken, worker) == success)
+                    if (validateLogin(currentLoginToken, userType::worker) == result::success)
                     {
                         clearContent();
                         showStockManage = true;
                     }
                     else
                     {
-                        showLoginNeeded(true, worker);
+                        showLoginNeeded(true, userType::worker);
                     }
                 }
                 if (ImGui::MenuItem("Add/Remove Items"))
                 {
-                    if (validateLogin(currentLoginToken, worker) == success)
+                    if (validateLogin(currentLoginToken, userType::worker) == result::success)
                     {
                         clearContent();
                         showStockManage = true;
                     }
                     else
                     {
-                        showLoginNeeded(true, worker);
+                        showLoginNeeded(true, userType::worker);
                     }
                 }
                 if (ImGui::MenuItem("Edit Item Properties"))
                 {
-                    if (validateLogin(currentLoginToken, worker) == success)
+                    if (validateLogin(currentLoginToken, userType::worker) == result::success)
                     {
                         clearContent();
                         showStockManage = true;
                     }
                     else
                     {
-                        showLoginNeeded(true, worker);
+                        showLoginNeeded(true, userType::worker);
                     }
                 }
                 ImGui::EndMenu();
@@ -266,14 +269,27 @@ int main(int, char**)
             {
                 if (MenuItem("Show statistics.."))
                 {
-                    if (validateLogin(currentLoginToken, guest) == success)
+                    if (validateLogin(currentLoginToken, userType::guest) == result::success)
                     {
                         clearContent();
                         showStat = true;
                     }
                     else
                     {
-                        showLoginNeeded(true, guest);
+                        showLoginNeeded(true, userType::guest);
+                    }
+                }
+                if (MenuItem("Show overview"))
+                {
+                    if (validateLogin(currentLoginToken, userType::guest) == result::success)
+                    {
+                        clearContent();
+                        showOverview = true;
+                        refresh_required = true;
+                    }
+                    else
+                    {
+                        showLoginNeeded(true, userType::guest);
                     }
                 }
                 ImGui::EndMenu();
@@ -282,7 +298,7 @@ int main(int, char**)
             {
                 if (MenuItem("User management"))
                 {
-                    if (validateLogin(currentLoginToken, admin) == success)
+                    if (validateLogin(currentLoginToken, userType::admin) == result::success)
                     {
                         clearContent();
                         showEditUser = true;
@@ -290,19 +306,19 @@ int main(int, char**)
 
                     else
                     {
-                        showLoginNeeded(true, admin);
+                        showLoginNeeded(true, userType::admin);
                     }
                 }
                 if (MenuItem("Open logs"))
                 {
-                    if (validateLogin(currentLoginToken, admin) == success)
+                    if (validateLogin(currentLoginToken, userType::admin) == result::success)
                     {
                         clearContent();
                         showLogwindow = true;
                     }
                     else
                     {
-                        showLoginNeeded(true, admin);
+                        showLoginNeeded(true, userType::admin);
                     }
                 }
                 ImGui::EndMenu();
@@ -311,14 +327,17 @@ int main(int, char**)
             {
                 if (MenuItem("Save And Exit"))
                 {
-                    StockMan.saveData();
+                    if(validateLogin(currentLoginToken,userType::worker) == result::success)StockMan.saveData();
+                    done = true;
+                    
                 }
                 if (MenuItem("Save"))
                 {
-                    StockMan.saveData();
+                    if (validateLogin(currentLoginToken, userType::worker) == result::success)StockMan.saveData();
                 }
                 if (MenuItem("Exit without saving"))
                 {
+                    done = true;
                 }
                 ImGui::EndMenu();
             }
@@ -334,7 +353,7 @@ int main(int, char**)
             {
                 static char username[32] = "";
                 static char password[32] = "";
-                PushFont(fontmap[normal][header][regular]);
+                PushFont(fontmap[fontStyle::normal][fontSize::header][fontWeight::regular]);
                 BeginChild("Title", ImVec2(windowsize_login.x, windowsize_login.y * 0.2f));
                 {
                     TextCenter("Stock Manager Program");
@@ -345,7 +364,7 @@ int main(int, char**)
                 BeginChild("LoginWindowContent", ImVec2(GetWindowContentRegionWidth() * 0.6f, windowsize_login.y * 0.63f), true);
                 {
                     SetCursorPosY(30);
-                    PushFont(fontmap[normal][text][regular]);
+                    PushFont(fontmap[fontStyle::normal][fontSize::text][fontWeight::regular]);
                     SetCursorPosX(50);
                     Text("Enter username:");
                     SetCursorPosX(50);
@@ -361,17 +380,17 @@ int main(int, char**)
                 BeginChild("Caption", ImVec2(GetWindowContentRegionWidth() * 0.39f, windowsize_login.y * 0.63f), true);
                 {
                     SetCursorPos(ImVec2(80, 40));
-                    PushFont(fontmap[normal][caption][regular]);
+                    PushFont(fontmap[fontStyle::normal][fontSize::caption][fontWeight::regular]);
                     if (Button("Login", ImVec2(100, 40)))
                     {
-                        currentLoginToken = StockMan.login(string(username),string(password));
+                        currentLoginToken = StockMan.login(string(username), string(password));
                         isloggedin = currentLoginToken.valid;
-                        
+
                     }
                     SetCursorPos(ImVec2(80, 85));
                     if (Button("Register", ImVec2(100, 40)))
                     {
-                        
+
                     }
                     PopFont();
                 }
@@ -390,12 +409,12 @@ int main(int, char**)
                 //Background
                 BeginChild("bg_left", ImVec2(320, 720), true);
                 {
-                    PushFont(fontmap[normal][header][regular]);
+                    PushFont(fontmap[fontStyle::normal][fontSize::header][fontWeight::regular]);
                     if (Button("In/Out Stock", ImVec2(300, 137)))
                     {
                         refresh_required = true;
-                        if (validateLogin(currentLoginToken, worker) != success)
-                            showLoginNeeded(1, worker);
+                        if (validateLogin(currentLoginToken, userType::worker) != result::success)
+                            showLoginNeeded(1, userType::worker);
                         else
                         {
                             ShowInStockWindow(true);
@@ -404,8 +423,8 @@ int main(int, char**)
                     if (Button("View Log", ImVec2(300, 137)))
                     {
                         refresh_required = true;
-                        if (validateLogin(currentLoginToken, admin) != success)
-                            showLoginNeeded(1, admin);
+                        if (validateLogin(currentLoginToken, userType::admin) != result::success)
+                            showLoginNeeded(1, userType::admin);
 
                         else
                         {
@@ -416,8 +435,8 @@ int main(int, char**)
                     if (Button("Manage Stock \n       Info", ImVec2(300, 137)))
                     {
                         refresh_required = true;
-                        if (validateLogin(currentLoginToken, worker) != success)
-                            showLoginNeeded(1, worker);
+                        if (validateLogin(currentLoginToken, userType::worker) != result::success)
+                            showLoginNeeded(1, userType::worker);
                         else
                         {
                             clearContent();
@@ -427,8 +446,8 @@ int main(int, char**)
                     if (Button("Manage Users", ImVec2(300, 137)))
                     {
                         refresh_required = true;
-                        if (validateLogin(currentLoginToken, admin) != success)
-                            showLoginNeeded(1, admin);
+                        if (validateLogin(currentLoginToken, userType::admin) != result::success)
+                            showLoginNeeded(1, userType::admin);
                         else
                         {
                             clearContent();
@@ -438,8 +457,8 @@ int main(int, char**)
                     if (Button("Statistics", ImVec2(300, 137)))
                     {
                         refresh_required = true;
-                        if (validateLogin(currentLoginToken, admin) != success)
-                            showLoginNeeded(1, guest);
+                        if (validateLogin(currentLoginToken, userType::guest) != result::success)
+                            showLoginNeeded(1, userType::guest);
                         else
                         {
                             clearContent();
@@ -643,11 +662,11 @@ bool InitGraphics()
     // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
     // - Read 'docs/FONTS.md' for more instructions and details.
     // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    fontmap[default][text][regular] = io.Fonts->AddFontDefault();
+    fontmap[fontStyle::default][fontSize::text][fontWeight::regular] = io.Fonts->AddFontDefault();
 
-    fontmap[normal][text][regular] = io.Fonts->AddFontFromFileTTF("./misc/fonts/refsan.ttf", 18.0f);
-    fontmap[normal][caption][regular] = io.Fonts->AddFontFromFileTTF("./misc/fonts/refsan.ttf", 22.0f);
-    fontmap[normal][header][regular] = io.Fonts->AddFontFromFileTTF("./misc/fonts/refsan.ttf", 40.0f);
+    fontmap[fontStyle::normal][fontSize::text][fontWeight::regular] = io.Fonts->AddFontFromFileTTF("./misc/fonts/refsan.ttf", 18.0f);
+    fontmap[fontStyle::normal][fontSize::caption][fontWeight::regular] = io.Fonts->AddFontFromFileTTF("./misc/fonts/refsan.ttf", 22.0f);
+    fontmap[fontStyle::normal][fontSize::header][fontWeight::regular] = io.Fonts->AddFontFromFileTTF("./misc/fonts/refsan.ttf", 40.0f);
 
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
@@ -688,8 +707,8 @@ void showLoginNeeded(bool isopen, userType requiredType)
 {
     static bool opened = false;
     static userType usrType = requiredType;
-    static map<userType, const char*> titles = { {guest, "Login Needed!"}, {worker, "Privellege Required!"}, {admin, "Privellege Required!"} };
-    static map<userType, const char*> contents = { {guest, "You need to at least login as guest to perform this operation.\n"}, {worker, "You need the privellege of worker or above \nto perform this operation.\n"}, {admin, "You need administration privellege to \nperform this operation.\n"} };
+    static map<userType, const char*> titles = { {userType::guest, "Login Needed!"}, {userType::worker, "Privellege Required!"}, {userType::admin, "Privellege Required!"} };
+    static map<userType, const char*> contents = { {userType::guest, "You need to at least login as guest to perform this operation.\n"}, {userType::worker, "You need the privellege of worker or above \nto perform this operation.\n"}, {userType::admin, "You need administration privellege to \nperform this operation.\n"} };
     if (isopen)
     {
         usrType = requiredType;
@@ -743,7 +762,7 @@ void showAbout(bool isopen)
 void showAddCategory(bool isopen)
 {
     static bool opened = false;
-    static result res = success;
+    static result res = result::success;
     static string hint;
     if (isopen)
     {
@@ -766,13 +785,13 @@ void showAddCategory(bool isopen)
             InputText("Category description", catedesc, 64);
             InputText("Comment", com, 64);
             Separator();
-            if (res != success)
+            if (res != result::success)
             {
                 Text(hint.c_str());
                 SameLine();
                 if (Button("Got it"))
                 {
-                    res = success;
+                    res = result::success;
                     memset(catename, 0, 32 * sizeof(char));
                     memset(catedesc, 0, 64 * sizeof(char));
                     memset(com, 0, 64 * sizeof(char));
@@ -787,7 +806,7 @@ void showAddCategory(bool isopen)
                     dest.desc = string(catedesc);
 
                     result res = StockMan.addCategory(dest, string(com));
-                    if (res == success)
+                    if (res == result::success)
                     {
                         opened = false;
                         refresh_required = true;
@@ -797,7 +816,7 @@ void showAddCategory(bool isopen)
                     {
                         switch (res)
                         {
-                        case item_already_exist:
+                        case result::item_already_exist:
                             hint = "This category already exists.Change a name!";
                             break;
                         default:
@@ -817,10 +836,10 @@ void showAddCategory(bool isopen)
         EndPopup();
     }
 }
-void showAddItem(bool isopen, uid cate,vector<uid> attrs)
+void showAddItem(bool isopen, uid cate, vector<uid> attrs)
 {
     static bool opened = false;
-    static result res = success;
+    static result res = result::success;
     static string hint;
     static int szattr;
     static int szcate;
@@ -879,13 +898,13 @@ void showAddItem(bool isopen, uid cate,vector<uid> attrs)
             }
             InputText("Comment", com, 64);
             Separator();
-            if (res != success)
+            if (res != result::success)
             {
                 Text(hint.c_str());
                 SameLine();
                 if (Button("Got it"))
                 {
-                    res = success;
+                    res = result::success;
                     memset(catename, 0, 32 * sizeof(char));
                     memset(catedesc, 0, 64 * sizeof(char));
                     memset(com, 0, 64 * sizeof(char));
@@ -905,7 +924,7 @@ void showAddItem(bool isopen, uid cate,vector<uid> attrs)
                     dest.min_count = min;
 
                     result res = StockMan.addItem(dest, string(com));
-                    if (res == success)
+                    if (res == result::success)
                     {
                         opened = false;
                         refresh_required = true;
@@ -926,7 +945,7 @@ void showAddItem(bool isopen, uid cate,vector<uid> attrs)
 void showAddAttr(bool isopen)
 {
     static bool opened = false;
-    static result res = success;
+    static result res = result::success;
     static string hint;
     if (isopen)
     {
@@ -949,13 +968,13 @@ void showAddAttr(bool isopen)
             InputText("Attribute description", catedesc, 64);
             InputText("Comment", com, 64);
             Separator();
-            if (res != success)
+            if (res != result::success)
             {
                 Text(hint.c_str());
                 SameLine();
                 if (Button("Got it"))
                 {
-                    res = success;
+                    res = result::success;
                     memset(catename, 0, 32 * sizeof(char));
                     memset(catedesc, 0, 64 * sizeof(char));
                     memset(com, 0, 64 * sizeof(char));
@@ -970,7 +989,7 @@ void showAddAttr(bool isopen)
                     dest.desc = string(catedesc);
 
                     result res = StockMan.addAttr(dest, string(com));
-                    if (res == success)
+                    if (res == result::success)
                     {
                         opened = false;
                         refresh_required = true;
@@ -980,7 +999,7 @@ void showAddAttr(bool isopen)
                     {
                         switch (res)
                         {
-                        case item_already_exist:
+                        case result::item_already_exist:
                             hint = "This attribute already exists.Change a name!";
                             break;
                         default:
@@ -1004,7 +1023,6 @@ void showRemoveCategory(uid id, bool isopen)
 {
     static uid dest_id;
     static bool opened = false;
-    ;
     if (isopen)
     {
         opened = true;
@@ -1013,6 +1031,8 @@ void showRemoveCategory(uid id, bool isopen)
     }
     if (opened)
     {
+        SetNextWindowSize(rect_remove,ImGuiCond_Appearing);
+        SetNextWindowPos(pos_remove, ImGuiCond_Appearing);
         OpenPopup("remove category");
         BeginPopupModal("remove category", NULL, wndflg_content);
         {
@@ -1055,6 +1075,8 @@ void showRemoveItem(uid id, bool isopen)
     }
     if (opened)
     {
+        SetNextWindowSize(rect_remove, ImGuiCond_Appearing);
+        SetNextWindowPos(pos_remove, ImGuiCond_Appearing);
         OpenPopup("remove item");
         BeginPopupModal("remove item", NULL, wndflg_content);
         {
@@ -1087,7 +1109,7 @@ void showRemoveItem(uid id, bool isopen)
 void showEditItem(uid id, bool isopen)
 {
     static bool opened = false;
-    static result res = success;
+    static result res = result::success;
     static string hint;
     static int szcate;
     static vector<stockAttr> attr;
@@ -1114,12 +1136,12 @@ void showEditItem(uid id, bool isopen)
         {
             static stockItem dest;
             static char itemname[32];
-            strcpy_s(itemname, item.name.c_str());
             static char itemdesc[64];
-            strcpy_s(itemdesc, item.desc.c_str());
             static char com[64];
             static int dur = 0;
-
+            strcpy_s(itemname, item.name.c_str());
+            strcpy_s(itemdesc, item.desc.c_str());
+            
             InputText("Item name", itemname, 32);
             InputText("Item description", itemdesc, 64);
 
@@ -1139,13 +1161,13 @@ void showEditItem(uid id, bool isopen)
             }
             InputText("Comment", com, 64);
             Separator();
-            if (res != success)
+            if (res != result::success)
             {
                 Text(hint.c_str());
                 SameLine();
                 if (Button("Got it"))
                 {
-                    res = success;
+                    res = result::success;
                     memset(itemname, 0, 32 * sizeof(char));
                     memset(itemdesc, 0, 64 * sizeof(char));
                     memset(com, 0, 64 * sizeof(char));
@@ -1160,7 +1182,7 @@ void showEditItem(uid id, bool isopen)
                     dest.desc = string(itemdesc);
 
                     result res = StockMan.editItem(itemid, string(itemname), string(itemdesc), cates[idxcate].id, string(com));
-                    if (res == success)
+                    if (res == result::success)
                     {
                         opened = false;
                         refresh_required = true;
@@ -1170,7 +1192,7 @@ void showEditItem(uid id, bool isopen)
                     {
                         switch (res)
                         {
-                        case item_already_exist:
+                        case result::item_already_exist:
                             hint = "This itemname already exists.Change a name!";
                             break;
                         default:
@@ -1195,7 +1217,6 @@ void showRemoveAttr(uid id, bool isopen)
 {
     static uid dest_id;
     static bool opened = false;
-    ;
     if (isopen)
     {
         opened = true;
@@ -1204,6 +1225,8 @@ void showRemoveAttr(uid id, bool isopen)
     }
     if (opened)
     {
+        SetNextWindowSize(rect_remove, ImGuiCond_Appearing);
+        SetNextWindowPos(pos_remove, ImGuiCond_Appearing);
         OpenPopup("remove attr");
         BeginPopupModal("remove attr", NULL, wndflg_content);
         {
@@ -1246,6 +1269,8 @@ void showRemoveUser(uid id, bool isopen)
     }
     if (opened)
     {
+        SetNextWindowSize(rect_remove, ImGuiCond_Appearing);
+        SetNextWindowPos(pos_remove, ImGuiCond_Appearing);
         OpenPopup("remove user");
         BeginPopupModal("remove user", NULL, wndflg_content);
         {
@@ -1278,7 +1303,7 @@ void showRemoveUser(uid id, bool isopen)
 void showEditCategory(uid id, bool isopen)
 {
     static bool opened = false;
-    static result res = success;
+    static result res = result::success;
     static string hint = "no hint";
     static uid dest = 0;
     if (isopen)
@@ -1297,14 +1322,14 @@ void showEditCategory(uid id, bool isopen)
             SameLine();
             InputText("Enter new name", name, 32);
             InputText("Enter new description", desc, 64);
-            if (res == success)
+            if (res == result::success)
             {
                 if (Button("Confirm"))
                 {
                     res = StockMan.editCategory(dest, string(name), string(desc));
-                    if (res != success)
+                    if (res != result::success)
                     {
-                        if (res == item_already_exist)
+                        if (res == result::item_already_exist)
                         {
                             hint = "Category name already exist.Change one.";
                         }
@@ -1330,7 +1355,7 @@ void showEditCategory(uid id, bool isopen)
                 Text(hint.c_str());
                 if (Button("Got it"))
                 {
-                    res = success;
+                    res = result::success;
                     hint = "";
                 }
             }
@@ -1341,27 +1366,27 @@ void showEditCategory(uid id, bool isopen)
 result validateLogin(loginToken token, userType type)
 {
 
-    result res = success;
+    result res = result::success;
     if (!token.valid)
-        return unknown_error;
+        return result::unknown_error;
     if (token.login_time > (unsigned)time(NULL))
-        return unknown_error;
+        return result::unknown_error;
     switch (type)
     {
-    case guest:
+    case userType::guest:
         break;
-    case worker:
-        if (token.usertype == admin)
-            return bad_privilege;
+    case userType::worker:
+        if (token.usertype == userType::guest)
+            return result::bad_privilege;
         break;
-    case admin:
-        if (token.usertype != admin)
-            return bad_privilege;
+    case userType::admin:
+        if (token.usertype != userType::admin)
+            return result::bad_privilege;
         break;
     default:
         break;
     }
-    if ((res = StockMan.findUser(token.userid)) != success)
+    if ((res = StockMan.findUser(token.userid)) != result::success)
         return res;
     return res;
 }
@@ -1388,26 +1413,30 @@ void ShowInStockWindow(bool isopen)
     static int sz1;
     static int sz2 = 0;
     static string comment;
+    static int combo_idx2 = 0;
+    static int combo_idx = 0;
     if (isopen)
     {
         opened = true;
         categories = StockMan.getCategories();
         sz1 = categories.size();
         if (sz1 != 0) {
-            items = StockMan.getItems(categories[0].id, set<uid>());
+            items = StockMan.getItems(categories[combo_idx].id, set<uid>());
             sz2 = items.size();
             if (sz2 != 0) {
-                id = items[0].id;
+                id = items[combo_idx2].id;
             }
         }
         return;
     }
     if (opened)
     {
+        SetNextWindowSize(rect_instock, ImGuiCond_Appearing);
+        SetNextWindowPos(pos_instock, ImGuiCond_Appearing);
         OpenPopup("In/Out Stock");
         BeginPopupModal("In/Out Stock", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
         {
-            static int combo_idx = 0;
+
             if (BeginCombo("Category", combo_idx < sz1 ? categories[combo_idx].name.c_str() : ""))
             {
                 for (int i = 0; i < sz1; i++)
@@ -1426,7 +1455,7 @@ void ShowInStockWindow(bool isopen)
                 }
                 EndCombo();
             }
-            static int combo_idx2 = 0;
+
             if (BeginCombo("ItemName", combo_idx2 < sz2 ? items[combo_idx2].name.c_str() : ""))
             {
                 for (int i = 0; i < sz2; i++)
@@ -1473,7 +1502,7 @@ void ShowEditUser(bool opt)
     if (opt)
     {
         static vector<userInfo> users;
-        static map<userType, const char*> strmap = { {guest, "guest"}, {worker, "worker"}, {admin, "admin"} };
+        static map<userType, const char*> strmap = { {userType::guest, "guest"}, {userType::worker, "worker"}, {userType::admin, "admin"} };
         static int sz = 0;
         if (refresh_required)
         {
@@ -1529,8 +1558,8 @@ void ShowEditUser(bool opt)
 
 void ShowStat(bool opt, statrange range)
 {
-    static statrange rng = year;
-    static map<statrange, int> cntmap = { {week, 7}, {month, 30}, {year, 12} };
+    static statrange rng = statrange::year;
+    static map<statrange, int> cntmap = { {statrange::week, 7}, {statrange::month, 30}, {statrange::year, 12} };
     static float fontHeight = CalcTextSize("A").y;
     if (opt)
     {
@@ -1570,10 +1599,10 @@ void ShowStat(bool opt, statrange range)
         if (refresh_required)
         {
             //fetch data and sort it
-            auto r = StockMan.getstat(rng, tm_range);
-            count_data_c = StockMan.getstatCate(rng, tm_range, is_currency);
             cates = StockMan.getCategories();
             cate_sz = cates.size();
+            auto r = StockMan.getstat(rng, tm_range);
+            count_data_c = StockMan.getstatCate(rng, tm_range, is_currency);
 
             count_data = get<0>(r);
             currency_data = get<1>(r);
@@ -1634,7 +1663,7 @@ void ShowStat(bool opt, statrange range)
                     SameLine();
                     ImVec2 v2 = GetCursorScreenPos();
                     v2.x = v1.x + 105;
-                    drawlist->AddRectFilled(ImVec2(v2.x,v2.y + 2), ImVec2(v2.x + (*i).second * 150.0 / cnt_max_c, v2.y + fontHeight - 2), is_currency ?  currency_color : count_color );
+                    drawlist->AddRectFilled(ImVec2(v2.x, v2.y + 2), ImVec2(v2.x + (*i).second * 150.0 / cnt_max_c, v2.y + fontHeight - 2), is_currency ? currency_color : count_color);
                     EndGroup();
                 }
             }
@@ -1644,23 +1673,23 @@ void ShowStat(bool opt, statrange range)
             {
                 if (Button("Year"))
                 {
-                    rng = year;
+                    rng = statrange::year;
                     refresh_required = true;
                 }
                 SameLine();
                 if (Button("Month"))
                 {
-                    rng = month;
+                    rng = statrange::month;
                     refresh_required = true;
                 }SameLine();
                 if (Button("Week"))
                 {
-                    rng = week;
+                    rng = statrange::week;
                     refresh_required = true;
                 }
                 SameLine();
                 if (Button("reset")) {
-                    rng = week;
+                    rng = statrange::week;
                     refresh_required = true;
                     tm_range = []() {
                         tm* dst;
@@ -1677,20 +1706,20 @@ void ShowStat(bool opt, statrange range)
                     refresh_required = true;
                     if (get<0>(tm_range) > 2021)get<0>(tm_range) = 2021;
                 }
-                if (rng == month || rng == week) {
-                    
+                if (rng == statrange::month || rng == statrange::week) {
+
                     if (InputInt("month", &get<1>(tm_range))) {
                         refresh_required = true;
-                        if (get<1>(tm_range) >= 12  || get<1>(tm_range) < 0)get<1>(tm_range) = 0;
+                        if (get<1>(tm_range) >= 12 || get<1>(tm_range) < 0)get<1>(tm_range) = 0;
                     }
                 }
-                if (rng == week) {
+                if (rng == statrange::week) {
                     if (InputInt("week", &get<2>(tm_range))) {
                         refresh_required = true;
                         if (get<2>(tm_range) >= 31 || get<2>(tm_range) < 0)get<2>(tm_range) = 0;
                     }
                 }
-                
+
                 Separator();
                 vec_graph.y = GetContentRegionAvail().y / 2 - 5;
                 BeginChild("count graph", vec_graph, true);
@@ -1744,7 +1773,7 @@ void ShowStockManage(bool opt)
             int sz = check.size();
             while (check.size() != Attributes.size()) {
                 if (check.size() < Attributes.size()) {
-                    check.push_back({ Attributes[sz++].id,false});
+                    check.push_back({ Attributes[sz++].id,false });
                 }
                 else if (check.size() > Attributes.size()) {
                     check.pop_back();
@@ -1757,7 +1786,7 @@ void ShowStockManage(bool opt)
         static ImVec2 vec_content2 = ImVec2(250, 704);
         BeginChild("Stock Categories", vec_content2, true);
         {
-            PushFont(fontmap[normal][caption][regular]);
+            PushFont(fontmap[fontStyle::normal][fontSize::caption][fontWeight::regular]);
             Text("Select category");
             PopFont();
             static ImVec2 vec_button = ImVec2(280, 100);
@@ -1775,7 +1804,7 @@ void ShowStockManage(bool opt)
             else
                 for (int i = 0; i < sz; i++)
                 {
-                    PushFont(fontmap[normal][caption][regular]);
+                    PushFont(fontmap[fontStyle::normal][fontSize::caption][fontWeight::regular]);
                     stockCategory current = Categories[i];
                     if (Button(current.name.c_str(), vec_button))
                     {
@@ -1811,7 +1840,7 @@ void ShowStockManage(bool opt)
             BeginChild("Checkbox", vec_checkbox, false);
             {
                 int sz = Attributes.size();
-                PushFont(fontmap[normal][caption][regular]);
+                PushFont(fontmap[fontStyle::normal][fontSize::caption][fontWeight::regular]);
                 Text("Attribute filter");
                 PopFont();
                 if (sz == 0)
@@ -1856,7 +1885,7 @@ void ShowStockManage(bool opt)
             Separator();
             BeginChild("inner stock content", vec_innercontent, false);
             {
-                PushFont(fontmap[normal][caption][regular]);
+                PushFont(fontmap[fontStyle::normal][fontSize::caption][fontWeight::regular]);
                 Text("Items");
                 PopFont();
                 int sz = current_items.size();
@@ -1865,7 +1894,7 @@ void ShowStockManage(bool opt)
                     Text("Currently there are not any \nitems in this category yet.");
                     if (Button("Press HERE to add one."))
                     {
-                        showAddItem(true,current_cate, vector<uid>(current_attrs.begin(), current_attrs.end()));
+                        showAddItem(true, current_cate, vector<uid>(current_attrs.begin(), current_attrs.end()));
                     }
                 }
                 if (BeginTable("content_table", 4))
@@ -1884,7 +1913,7 @@ void ShowStockManage(bool opt)
                             }
                             if (Selectable("add item"))
                             {
-                                showAddItem(true,current_cate,vector<uid>(current_attrs.begin(),current_attrs.end()));
+                                showAddItem(true, current_cate, vector<uid>(current_attrs.begin(), current_attrs.end()));
                             }
                             if (Selectable("remove item"))
                             {
@@ -1922,23 +1951,28 @@ void ShowOverView(bool opt)
         {
             info = StockMan.overview();
             sz = info.size();
+            isfirstopen = false;
         }
         BeginChild("OverView", vec_content, true, wndflg_content);
-
+        if (sz == 0) {
+            PushFont(fontmap[fontStyle::normal][fontSize::caption][fontWeight::regular]);
+            Text("Currently there are not any warnings.");
+            PopFont();
+        }
         for (int i = 0; i < sz; i++)
         {
-            BeginChild((string("##overviewchild") + to_string(i)).c_str(), ImVec2(900, 200), true);
+            BeginChild((string("##overviewchild") + to_string(i)).c_str(), ImVec2(900, 100), true);
             {
                 switch (get<0>(info[i]))
                 {
-                case outdate:
-                    Text("Item %s %s is partially out of durance.\nMax-durance: %d ,outdatad items count: %d", get<1>(info[i]).c_str(), get<2>(info[i]).c_str(), get<3>(info[i]), get<4>(info[i]));
+                case infoType::outdate:
+                    Text("Item %s :%s is partially out of durance.\nMax-durance: %f ,outdatad items count: %f", get<1>(info[i]).c_str(), get<2>(info[i]).c_str(), get<3>(info[i]), get<4>(info[i]));
                     break;
-                case notenough:
-                    Text("Item %s %s is around empty.\nCurrent remaining: %d ,Minimun required: %d\nPlease add in time.", get<1>(info[i]).c_str(), get<2>(info[i]).c_str(), get<3>(info[i]), get<4>(info[i]));
+                case infoType::notenough:
+                    Text("Item %s :%s is around empty.\nCurrent remaining: %f ,Minimun required: %f\nPlease add in time.", get<1>(info[i]).c_str(), get<2>(info[i]).c_str(), get<3>(info[i]), get<4>(info[i]));
                     break;
-                case full:
-                    Text("Item %s %s is already full.\nCurrent count: %d\nMax-capacity: %d", get<1>(info[i]).c_str(), get<2>(info[i]).c_str(), get<3>(info[i]), get<4>(info[i]));
+                case infoType::full:
+                    Text("Item %s :%s is already full.\nCurrent count: %f\nMax-capacity: %f", get<1>(info[i]).c_str(), get<2>(info[i]).c_str(), get<3>(info[i]), get<4>(info[i]));
                     break;
                 default:
                     break;
@@ -2065,9 +2099,9 @@ void showAddUser(bool isopen)
 
             InputText("Username", c_username, 32);
             InputText("Password", c_password, 32);
-            static result res = success;
+            static result res = result::success;
             static const char* strs[] = { "guest", "worker", "admin" };
-            static const userType prvs[] = { guest, worker, admin };
+            static const userType prvs[] = { userType::guest, userType::worker, userType::admin };
             static int idx = 0;
             if (BeginCombo("UserType", strs[idx]))
             {
@@ -2086,12 +2120,12 @@ void showAddUser(bool isopen)
                 EndCombo();
             }
             Separator();
-            if (res == success)
+            if (res == result::success)
             {
                 if (Button("Confirm"))
                 {
                     res = StockMan.regist(string(c_username), string(c_password), prvs[idx]);
-                    if (res == success)
+                    if (res == result::success)
                     {
                         refresh_required = true;
                         opened = false;
@@ -2109,10 +2143,10 @@ void showAddUser(bool isopen)
             {
                 switch (res)
                 {
-                case item_already_exist:
+                case result::item_already_exist:
                     Text("This username already exist.Try another one.");
                     break;
-                case bad_password:
+                case result::bad_password:
                     Text("Invalid Password or username,which should only consist of letters and numbers");
                     break;
                 default:
@@ -2122,7 +2156,7 @@ void showAddUser(bool isopen)
                 SameLine();
                 if (Button("Got it"))
                 {
-                    res = success;
+                    res = result::success;
                     memset(c_username, 0, 32 * sizeof(char));
                     memset(c_password, 0, 32 * sizeof(char));
                 }

@@ -30,7 +30,7 @@
 </name>  <desc> 
 </desc> 
 </stockattr> 
-</attr_definition>  <item_data_outer> 2 <item_data_inner> 1618759984 5  <stockitem> 1618766401 1 0 1 10 5 1618759984 <name> default
+</attr_definition>  <item_data_outer> 4 <item_data_inner> 1618759984 6  <stockitem> 1618766401 1 0 1 10 5 1618759984 <name> default
 </name>  <desc> 
 </desc>  <attrs> 1 1618759987 
 </attrs>  <detail> 1 1618766588 5 
@@ -40,23 +40,60 @@
 </desc>  <attrs> 2 1618759987 1618766418 
 </attrs>  <detail> 1 1618766610 5 
 </detail> 
-</stockitem>  <stockitem> 1618766477 1 0 1 10 5 1618759984 <name> default-metal
+</stockitem>  <stockitem> 1618766477 1 0 1 10 12 1618759984 <name> default-metal
 </name>  <desc> 
 </desc>  <attrs> 2 1618759987 1618766425 
-</attrs>  <detail> 1 1618766580 5 
-</detail> 
-</stockitem>  <stockitem> 1618766490 1 0 1 10 5 1618759984 <name> default-nowater
-</name>  <desc> 
-</desc>  <attrs> 2 1618759987 1618766440 
-</attrs>  <detail> 1 1618766577 5 
+</attrs>  <detail> 2 1618766580 5 1618812711 7 
 </detail> 
 </stockitem>  <stockitem> 1618766502 10 0 1 10 5 1618759984 <name> default-expensive
 </name>  <desc> 
 </desc>  <attrs> 2 1618759987 1618766451 
 </attrs>  <detail> 1 1618766584 5 
 </detail> 
+</stockitem>  <stockitem> 1618811758 10 0 1 100 30 1618759984 <name> default-nowater
+</name>  <desc> 
+</desc>  <attrs> 2 1618759987 1618766440 
+</attrs>  <detail> 2 1618811766 5 1618813382 25 
+</detail> 
+</stockitem>  <stockitem> 1618812783 10 0 20 100 0 1618759984 <name> default-notenough
+</name>  <desc> 
+</desc>  <attrs> 1 1618759987 
+</attrs>  <detail> 0 
+</detail> 
 </stockitem> 
-</item_data_inner>  <item_data_inner> 1618762250 0 
+</item_data_inner>  <item_data_inner> 1618762250 2  <stockitem> 1618767507 1 0 10 1000 15 1618762250 <name> 1 omega
+</name>  <desc> 
+</desc>  <attrs> 1 1618759987 
+</attrs>  <detail> 2 1618804415 9 1618804955 6 
+</detail> 
+</stockitem>  <stockitem> 1618767558 2 0 10 1000 16 1618762250 <name> 2 omega
+</name>  <desc> 
+</desc>  <attrs> 1 1618759987 
+</attrs>  <detail> 2 1618804899 6 1618804950 10 
+</detail> 
+</stockitem> 
+</item_data_inner>  <item_data_inner> 1618762273 2  <stockitem> 1618812919 10 0 10 100 15 1618762273 <name> circular 3F
+</name>  <desc> 
+</desc>  <attrs> 1 1618759987 
+</attrs>  <detail> 1 1618813029 15 
+</detail> 
+</stockitem>  <stockitem> 1618812937 5 0 10 100 20 1618762273 <name> cubic 3F
+</name>  <desc> 
+</desc>  <attrs> 1 1618759987 
+</attrs>  <detail> 1 1618813020 20 
+</detail> 
+</stockitem> 
+</item_data_inner>  <item_data_inner> 1618762312 2  <stockitem> 1618812992 10 0 10 1000 30 1618762312 <name> linear 3H
+</name>  <desc> 
+</desc>  <attrs> 1 1618759987 
+</attrs>  <detail> 1 1618813438 30 
+</detail> 
+</stockitem>  <stockitem> 1618813008 10 0 10 1000 30 1618762312 <name> circular 3H
+</name>  <desc> 
+</desc>  <attrs> 1 1618759987 
+</attrs>  <detail> 1 1618813387 30 
+</detail> 
+</stockitem> 
 </item_data_inner> 
 </item_data_outer>  <users> 3  <userinfo> 1618759979 <username> orange
 </username>  <password> orange

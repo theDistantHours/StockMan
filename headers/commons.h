@@ -8,7 +8,7 @@
 #include<algorithm>
 
 
-enum result {
+enum class result {
     success,
     item_not_found, item_already_exist,item_out_of_capacity,
     bad_privilege,
@@ -25,9 +25,9 @@ time_t getTime(bool isEmulated);
 
 class data {
     virtual result load(std::ifstream &file) {
-        return success;
+        return result::success;
     }
     virtual result write(std::ofstream &file) {
-        return success;
+        return result::success;
     }
 };

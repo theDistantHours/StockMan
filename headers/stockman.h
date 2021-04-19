@@ -5,19 +5,19 @@
 using namespace std;
 
 //metadata structure definitions
-enum userType {
+enum class userType {
     guest, worker, admin
 };
-enum infoType {
+enum class infoType {
     full, notenough, outdate
 };
-enum operationType {
+enum class operationType {
     ADD, REMOVE, QUERY, LOGIN
 };
-enum operationTarget {
+enum class operationTarget {
     stock, category, attr, users
 };
-enum statrange { week, month, year };
+enum class  statrange{ week, month, year };
 
 struct record;
 struct userInfo;
@@ -50,7 +50,7 @@ struct userInfo :public data {
     string description = "";
     time_t regdate = 0;
 
-    userType privilege = guest;
+    userType privilege = userType::guest;
 
     result write(ofstream&) override;
     result load(ifstream&) override;
@@ -131,14 +131,21 @@ public:
     result setLoginToken(loginToken token_p, string username_p) {
         token = token_p;
         username = username_p;
-        return success;
+        return result::success;
     }
     result log(string text);
+    logMan() {
+        token = loginToken();
+        username = "";
+    }
+    ~logMan() {
+        file.close();
+    }
 private:
-    
+    string filename;
     loginToken token;
     string username;
-    fstream file;
+    ofstream file;
 };
 
 class stockMan {
@@ -149,7 +156,7 @@ public:
 
     loginToken login(string username, string password);
     loginToken getCurrentToken(void);
-    result regist(string username, string password, userType usrType = guest);
+    result regist(string username, string password, userType usrType = userType::guest);
 
     vector<stockCategory> getCategories(void);
     vector<stockAttr> getAttrs(void);
