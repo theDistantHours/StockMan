@@ -79,7 +79,7 @@ result validateLogin(loginToken token, userType type);
 //Modal helper functions
 void showLoginNeeded(bool isopen = false, userType requiredType = userType::guest);
 void showAbout(bool isopen = false);
-void ShowInStockWindow(bool opt = false);
+void ShowInStockWindow(bool opt = false,uid cate = -1, uid item = -1);
 void ShowItemDetail(uid dest = 0, bool isopen = 0);
 void showUserInfo(uid id = 0, bool isopen = false);
 
@@ -622,9 +622,9 @@ bool InitGraphics()
 {
     // Create application window
     //ImGui_ImplWin32_EnableDpiAwareness();
-    g_wcex = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
+    g_wcex = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("StockMan"), NULL };
     ::RegisterClassEx(&g_wcex);
-    g_hwnd = ::CreateWindow(g_wcex.lpszClassName, _T("Dear ImGui DirectX11 Example"), WS_OVERLAPPEDWINDOW & (~WS_THICKFRAME), 100, 100, 1280, 800, NULL, NULL, g_wcex.hInstance, NULL);
+    g_hwnd = ::CreateWindow(g_wcex.lpszClassName, _T("StockMan"), WS_OVERLAPPEDWINDOW & (~WS_THICKFRAME), 100, 100, 1280, 800, NULL, NULL, g_wcex.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(g_hwnd))
@@ -1402,7 +1402,7 @@ void ShowLogWindow(bool opt)
     }
 }
 
-void ShowInStockWindow(bool isopen)
+void ShowInStockWindow(bool isopen,uid cate,uid item)
 {
     static bool opened = false;
     static vector<stockCategory> categories;
@@ -1421,12 +1421,29 @@ void ShowInStockWindow(bool isopen)
         categories = StockMan.getCategories();
         sz1 = categories.size();
         if (sz1 != 0) {
+            if (cate != -1) {
+                for (int i = 0; i < categories.size(); i++) {
+                    if (categories[i].id == cate) {
+                        combo_idx = i;
+                        break;
+                    }
+                }
+            }
             items = StockMan.getItems(categories[combo_idx].id, set<uid>());
             sz2 = items.size();
             if (sz2 != 0) {
+                if (item != -1) {
+                    for (int i = 0; i < items.size(); i++) {
+                        if (items[i].id == item) {
+                            combo_idx2 = i;
+                            break;
+                        }
+                    }
+                }
                 id = items[combo_idx2].id;
             }
         }
+        
         return;
     }
     if (opened)
@@ -1905,8 +1922,11 @@ void ShowStockManage(bool opt)
                         if (Selectable(current_items[i].name.c_str()))
                         {
                         }
-                        if (BeginPopupContextItem((string("itemview_") + to_string(i)).c_str()))
+                        if (BeginPopupContextItem((string("itemview_") +StockMan.getCategory(current_cate).name + to_string(i)).c_str()))
                         {
+                            if (Selectable("In/out stock")) {
+                                ShowInStockWindow(true,current_cate,current_items[i].id);
+                            }
                             if (Selectable("view details"))
                             {
                                 ShowItemDetail(current_items[i].id, true);

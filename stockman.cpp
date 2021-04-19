@@ -933,11 +933,11 @@ vector<stockItem> stockMan::getItems(uid category, set<uid> attrs)
                     auto z = attrs.begin();
                     while (z != attrs.end())
                     {
-                        if (find(y->attrs.begin(), y->attrs.end(), *z) != y->attrs.end())
-                            return true;
+                        if (find(y->attrs.begin(), y->attrs.end(), *z) == y->attrs.end())
+                            return false;
                         z++;
                     }
-                    return false;
+                    return true;
                     }()))
                 {
                     stockItem current;
