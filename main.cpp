@@ -1121,6 +1121,13 @@ void showEditItem(uid id, bool isopen)
     static stockItem item;
     static int idxcate;
     static vector<stockCategory> cates;
+
+    static stockItem dest;
+    static char itemname[32];
+    static char itemdesc[64];
+    static char com[64];
+    static int dur = 0;
+    
     if (isopen)
     {
         opened = true;
@@ -1129,6 +1136,8 @@ void showEditItem(uid id, bool isopen)
         item = StockMan.getItem(itemid);
         cates = StockMan.getCategories();
         szcate = cates.size();
+        strcpy_s(itemname, item.name.c_str());
+        strcpy_s(itemdesc, item.desc.c_str());
         return;
     }
     if (opened)
@@ -1138,13 +1147,6 @@ void showEditItem(uid id, bool isopen)
         OpenPopup("edit item");
         BeginPopupModal("edit item", NULL, wndflg_content);
         {
-            static stockItem dest;
-            static char itemname[32];
-            static char itemdesc[64];
-            static char com[64];
-            static int dur = 0;
-            strcpy_s(itemname, item.name.c_str());
-            strcpy_s(itemdesc, item.desc.c_str());
             
             InputText("Item name", itemname, 32);
             InputText("Item description", itemdesc, 64);

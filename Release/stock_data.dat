@@ -51,7 +51,7 @@
 </attrs>  <detail> 1 1618766584 5 
 </detail> 
 </stockitem>  <stockitem> 1618811758 10 0 1 100 30 1618759984 <name> default-nowater
-</name>  <desc> a default item with attr default and nowater.
+</name>  <desc> 
 </desc>  <attrs> 2 1618759987 1618766440 
 </attrs>  <detail> 2 1618811766 5 1618813382 25 
 </detail> 
