@@ -136,7 +136,10 @@ void clearContent(void)
 static loginToken currentLoginToken;
 
 // Main code
-int main(int, char**)
+int WINAPI WinMain(HINSTANCE hInstance,
+    HINSTANCE hPrevInstance,
+    LPSTR lpCmdLine,
+    int nCmdShow)
 {
     // Initialize window and graphics
     if (!InitGraphics())
@@ -1608,13 +1611,13 @@ void ShowStat(bool opt, statrange range)
         static int cnt_max = 0;
         static int currency_max = 0;
         static tuple<int, int, int> tm_range = []() {
-            tm* dst;
+            tm dst;
             time_t tmp;
             time(&tmp);
-            dst = localtime(&tmp);
-            int a = dst->tm_year;
-            int b = dst->tm_mon;
-            int c = dst->tm_mday / 4;
+            localtime_s(&dst,&tmp);
+            int a = dst.tm_year;
+            int b = dst.tm_mon;
+            int c = dst.tm_mday / 4;
             return tuple<int, int, int>({ a,b,c });
         }();
 

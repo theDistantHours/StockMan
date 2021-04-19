@@ -133,7 +133,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)/Lib/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -184,6 +184,12 @@
   <ItemGroup>
     <None Include="misc\debuggers\imgui.natvis" />
     <None Include="..\README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="misc\fonts\Noto Bold.otf" />
+    <Font Include="misc\fonts\Noto Medium.otf" />
+    <Font Include="misc\fonts\Noto Regular.otf" />
+    <Font Include="misc\fonts\refsan.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

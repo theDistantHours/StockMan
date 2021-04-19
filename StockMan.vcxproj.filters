@@ -10,6 +10,12 @@
     <Filter Include="headers">
       <UniqueIdentifier>{2a96f0bd-ced8-4576-b5d9-8638d7e72928}</UniqueIdentifier>
     </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{45b737c5-2001-44df-87a7-d6e340912079}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc\fonts">
+      <UniqueIdentifier>{1fb28b53-478b-4b39-874a-c450b64bbec9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -89,5 +95,19 @@
     <None Include="misc\debuggers\imgui.natvis">
       <Filter>imgui</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="misc\fonts\Noto Bold.otf">
+      <Filter>misc\fonts</Filter>
+    </Font>
+    <Font Include="misc\fonts\Noto Medium.otf">
+      <Filter>misc\fonts</Filter>
+    </Font>
+    <Font Include="misc\fonts\Noto Regular.otf">
+      <Filter>misc\fonts</Filter>
+    </Font>
+    <Font Include="misc\fonts\refsan.ttf">
+      <Filter>misc\fonts</Filter>
+    </Font>
   </ItemGroup>
 </Project>
